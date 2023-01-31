@@ -35,8 +35,8 @@ frontend:
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
-  podSecurityContext:
-    fsGroup: 1000
+  podSecurityContext: {}
+    # fsGroup: 1000
 
   securityContext:
     capabilities:
@@ -146,7 +146,7 @@ api:
       enabled: true
       type: redis
     redis:
-      enabled: true
+      enabled: false
       host: ""
       password: ""
       db: 0
@@ -285,7 +285,7 @@ postgresql: {}
 #  │┬┘├─ │ ││└─┐
 #  ┘└┘┴─┘┘─┘┘──┘
 
-redisEnabled: true
+redisEnabled: false
 # Please refer to Redis subchart for a full list of possible values
 redis: {}
 
