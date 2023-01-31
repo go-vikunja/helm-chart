@@ -8,6 +8,9 @@ spec:
   {{- if not .Values.api.autoscaling.enabled }}
   replicas: {{ .Values.api.replicaCount }}
   {{- end }}
+  {{- with .Values.api.extraDeploymentSpec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "vikunja.apiSelectorLabels" . | nindent 6 }}
@@ -29,19 +32,26 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.api.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
-      - name: {{ .Chart.Name }}
+      {{- with .Values.api.sidecarContainers }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      - name: api
         {{- with .Values.api.securityContext }}
         securityContext:
           {{- toYaml . | nindent 10 }}
         {{- end }}
         {{- $image := required ".image.repository is not set" .Values.api.image.repository }}
-        {{- $tag := required ".image.tag is not set" .Values.api.image.tag }}
+        {{- $tag := default .Chart.AppVersion .Values.api.image.tag | toString }}
         image: {{ printf "%s:%s" $image $tag | quote }}
         imagePullPolicy: {{ .Values.api.image.pullPolicy }}
         ports:
         - name: http
-          containerPort: 5000
+          containerPort: {{ (.Values.api.config.service.interface | split ":")._1 | int }}
           protocol: TCP
         {{- with .Values.api.env }}
         env:

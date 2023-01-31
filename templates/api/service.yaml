@@ -13,3 +13,6 @@ spec:
     name: http
   selector:
     {{- include "vikunja.apiSelectorLabels" . | nindent 4 }}
+  {{- with .Values.api.service.extraSpec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}

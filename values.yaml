@@ -10,15 +10,21 @@ serviceAccount:
   create: true
   # Annotations to add to the service account
   annotations: {}
+  # Extra labels
+  extraLabels: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
+
+# Extra labels that will be added to all resources
+extraLabels: {}
 
 #  ┬─┐┬─┐┌─┐┌┐┐┌┐┐┬─┐┌┐┐┬─┐
 #  ├─ │┬┘│ ││││ │ ├─ ││││ │
 #  ┘  ┘└┘┘─┘┘└┘ ┘ ┴─┘┘└┘┘─┘
 
 frontend:
+  # Public API URL that client's browser will reach
   apiUrl: ""
 
   replicaCount: 1
@@ -27,11 +33,7 @@ frontend:
     repository: vikunja/frontend
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 0.20.2
-
-  imagePullSecrets: []
-
-  podAnnotations: {}
+    tag: ""
 
   podSecurityContext:
     fsGroup: 1000
@@ -47,6 +49,8 @@ frontend:
   service:
     type: ClusterIP
     port: 80
+    # If you want to set other fields, like externalName, externalTrafficPolicy, etc.
+    extraSpec: {}
 
   ingress:
     enabled: false
@@ -83,6 +87,18 @@ frontend:
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
 
+  initContainers: []
+
+  sidecarContainers: []
+
+  # Extra keys to set in deployment.spec.
+  # Useful if you want to set minReadySeconds, progressDeadlineSeconds, strategy
+  extraDeploymentSpec: {}
+
+  imagePullSecrets: []
+
+  podAnnotations: {}
+
   nodeSelector: {}
 
   tolerations: []
@@ -115,6 +131,7 @@ frontend:
 #  ┘ ┘┘  ┘
 
 api:
+  # Values for this config are described here https://vikunja.io/docs/config-options/
   config:
     service:
       JWTSecret: ""
@@ -163,14 +180,7 @@ api:
     repository: vikunja/api
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: 0.20.1
-
-  imagePullSecrets: []
-
-  podAnnotations: {}
-
-  podSecurityContext: {}
-    # fsGroup: 1000
+    tag: ""
 
   securityContext:
     capabilities:
@@ -183,6 +193,8 @@ api:
   service:
     type: ClusterIP
     port: 80
+    # If you want to set other fields, like externalName, externalTrafficPolicy, etc.
+    extraSpec: {}
 
   ingress:
     enabled: false
@@ -218,6 +230,21 @@ api:
     maxReplicas: 100
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
+
+  initContainers: []
+
+  sidecarContainers: []
+
+  # Extra keys to set in deployment.spec.
+  # Useful if you want to set minReadySeconds, progressDeadlineSeconds, strategy
+  extraDeploymentSpec: {}
+
+  imagePullSecrets: []
+
+  podAnnotations: {}
+
+  podSecurityContext: {}
+    # fsGroup: 1000
 
   nodeSelector: {}
 
@@ -261,3 +288,10 @@ postgresql: {}
 redisEnabled: true
 # Please refer to Redis subchart for a full list of possible values
 redis: {}
+
+#  ┬─┐┬─┐┐ ┬
+#  │┬┘│─┤│││
+#  ┘└┘┘ ┘└┴┘
+
+# You can create custom resources from the plaintext definition
+raw: []

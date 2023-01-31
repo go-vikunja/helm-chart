@@ -1,6 +1,3 @@
-
-
-
 apiVersion: v2
 type: application
 name: vikunja
@@ -40,4 +37,3 @@ maintainers:
 sources:
 - https://kolaente.dev/vikunja/helm-chart
 - https://vikunja.io
-

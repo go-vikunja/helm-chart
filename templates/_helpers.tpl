@@ -48,6 +48,9 @@ Selector labels
 {{- define "vikunja.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "vikunja.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- with .Values.extraLabels }}
+{{- toYaml . | nindent 0 }}
+{{- end }}
 {{- end }}
 
 {{/*

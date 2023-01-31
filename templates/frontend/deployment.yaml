@@ -8,6 +8,9 @@ spec:
   {{- if not .Values.frontend.autoscaling.enabled }}
   replicas: {{ .Values.frontend.replicaCount }}
   {{- end }}
+  {{- with .Values.frontend.extraDeploymentSpec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "vikunja.frontendSelectorLabels" . | nindent 6 }}
@@ -29,29 +32,21 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.frontend.initContainers }}
       initContainers:
-      - name: permissions
-        image: alpine:3.16.3
-        imagePullPolicy: IfNotPresent
-        command: ["/bin/sh", "-c"]
-        args:
-        - |-
-          cd /var/cache/nginx
-          for i in client_temp proxy_temp fastcgi_temp uwsgi_temp csgi_temp scgi_temp; do
-            mkdir -p "$i"
-            chown -Rv 1000:1000 "$i"
-          done
-        volumeMounts:
-        - name: nginx-cache
-          mountPath: /var/cache/nginx
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
-      - name: {{ .Chart.Name }}
+      {{- with .Values.frontend.sidecarContainers }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      - name: frontend
         {{- with .Values.frontend.securityContext }}
         securityContext:
           {{- toYaml . | nindent 10 }}
         {{- end }}
         {{- $image := required ".image.repository is not set" .Values.frontend.image.repository }}
-        {{- $tag := required ".image.tag is not set" .Values.frontend.image.tag }}
+        {{- $tag := default .Chart.AppVersion .Values.frontend.image.tag | toString }}
         image: {{ printf "%s:%s" $image $tag | quote }}
         imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
         ports:
@@ -89,15 +84,11 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /tmp
-        - name: nginx-cache
-          mountPath: /var/cache/nginx
         {{- with .Values.frontend.extraVolumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       volumes:
       - name: tmp
-        emptyDir: {}
-      - name: nginx-cache
         emptyDir: {}
       {{- with .Values.frontend.extraVolumes }}
       {{- toYaml . | nindent 6 }}

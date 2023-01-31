@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "vikunja.fullname" . }}
+  name: {{ include "vikunja.frontendFullname" . }}
   labels:
     {{- include "vikunja.labels" . | nindent 4 }}
 spec:
@@ -13,3 +13,6 @@ spec:
     name: http
   selector:
     {{- include "vikunja.frontendSelectorLabels" . | nindent 4 }}
+  {{- with .Values.frontend.service.extraSpec }}
+  {{- toYaml . | nindent 2 }}
+  {{- end }}
