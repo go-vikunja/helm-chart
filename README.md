@@ -36,7 +36,6 @@ raw:
   spec:
     domains:
     - example.com
-...
 ```
 
 Or, let's say, you have decided to use Google SQL database instead of self-hosted, and placed credentials in Google Secret Manager. You plan to use [ExternalSecrets](https://external-secrets.io/v0.7.2/) to get that credentials. These can be easily integrated as well.
@@ -101,3 +100,20 @@ raw:
 ```
 
 Enjoy!
+
+## Contributing
+
+In order to publish the chart, you have to either use curl or helm cm-push.
+
+```shell
+helm package .
+curl --user '<username>:<password>' -X POST --upload-file './<archive>.tgz' https://kolaente.dev/api/packages/vikunja/helm/api/charts
+```
+
+```shell
+helm package .
+helm repo add --username '<username>' --password '<password>' vikunja https://kolaente.dev/api/packages/vikunja/helm
+helm cm-push './<archive>.tgz' vikunja
+```
+
+As you can see, you do not have to specify the name of the repository, just the name of the organization.

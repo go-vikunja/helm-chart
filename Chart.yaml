@@ -10,7 +10,7 @@ description: |-
   the high alpine areas of the Andes and a relative of the llama.
 annotations:
   category: TaskTracker
-version: 0.1.0
+version: 0.1.1
 appVersion: 0.20.1
 kubeVersion: ">= 1.19"
 dependencies:
