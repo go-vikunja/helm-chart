@@ -1,0 +1,43 @@
+
+
+
+apiVersion: v2
+type: application
+name: vikunja
+home: https://kolaente.dev/vikunja/helm-chart
+icon: https://bitnami.com/assets/stacks/postgresql/img/postgresql-stack-220x234.png
+deprecated: false
+description: |-
+  The open-source, self-hostable to-do app. Organize everything, on all platforms.
+  Also one of the two wild South American camelids which live in
+  the high alpine areas of the Andes and a relative of the llama.
+annotations:
+  category: TaskTracker
+version: 0.1.0
+appVersion: 0.20.1
+kubeVersion: ">= 1.19"
+dependencies:
+- name: redis
+  version: 17.5.1
+  repository: https://charts.bitnami.com/bitnami
+  condition: redisEnabled
+- name: postgresql
+  version: 12.1.9
+  repository: https://charts.bitnami.com/bitnami
+  condition: postgresqlEnabled
+keywords:
+- vikunja
+- todo
+- to-do
+- task
+- tack-tracker
+maintainers:
+- name: Vikunja
+  url: https://vikunja.io
+- name: Yurii Vlasov
+  email: yuriy@vlasov.pro
+  url: https://vlasov.pro
+sources:
+- https://kolaente.dev/vikunja/helm-chart
+- https://vikunja.io
+

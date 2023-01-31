@@ -1,0 +1,41 @@
+{{- if .Values.frontend.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "vikunja.frontendFullname" . }}
+  labels:
+    {{- include "vikunja.labels" . | nindent 4 }}
+  {{- with .Values.frontend.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.frontend.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- if .Values.frontend.ingress.tls }}
+  tls:
+  {{- range .Values.frontend.ingress.tls }}
+  - secretName: {{ quote .secretName }}
+    hosts:
+      {{- toYaml .hosts | nindent 8 }}
+  {{- end }}
+  {{- end }}
+  rules:
+  {{- range .Values.frontend.ingress.hosts }}
+  - host: {{ quote .host }}
+    http:
+      paths:
+      {{- range .paths }}
+      - path: {{ quote .path }}
+        {{- with .pathType }}
+        pathType: {{ . }}
+        {{- end }}
+        backend:
+          service:
+            name: {{ include "vikunja.frontendFullname" $ }}
+            port:
+              name: http
+      {{- end }}
+  {{- end }}
+{{- end }}

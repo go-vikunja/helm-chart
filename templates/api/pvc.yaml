@@ -1,0 +1,10 @@
+{{- if .Values.api.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "vikunja.apiFullname" . }}
+  labels:
+    {{- include "vikunja.labels" . | nindent 4 }}
+spec:
+  {{- toYaml .Values.api.persistence.spec | nindent 2 }}
+{{- end }}
