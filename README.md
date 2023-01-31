@@ -5,7 +5,7 @@ Deployes both frontend and backend. Also, you can deploy bitnami's PostgreSQL an
 
 ## Requirements
 
-Kubernetes >= 1.19
+Kubernetes >= 1.19  
 Helm >= 3
 
 ## Advanced features

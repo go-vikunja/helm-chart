@@ -5,7 +5,7 @@ apiVersion: v2
 type: application
 name: vikunja
 home: https://kolaente.dev/vikunja/helm-chart
-icon: https://bitnami.com/assets/stacks/postgresql/img/postgresql-stack-220x234.png
+icon: https://kolaente.dev/vikunja/helm-chart/raw/commit/d1f609a6c4b4d06c793611f3af812c98e07d502b/icon.png
 deprecated: false
 description: |-
   The open-source, self-hostable to-do app. Organize everything, on all platforms.
