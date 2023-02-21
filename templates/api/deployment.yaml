@@ -16,8 +16,9 @@ spec:
       {{- include "vikunja.apiSelectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.api.podAnnotations }}
       annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+      {{- with .Values.api.podAnnotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
@@ -90,7 +91,7 @@ spec:
         {{- if eq .Values.api.config.database.type "sqlite" }}
         - name: storage
           subPath: sqlite
-          mountPath: {{ base .Values.api.config.database.path | quote }}
+          mountPath: {{ dir .Values.api.config.database.path | quote }}
         {{- end }}
         {{- end }}
         {{- with .Values.api.extraVolumeMounts }}

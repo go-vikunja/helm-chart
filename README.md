@@ -8,6 +8,19 @@ Deployes both frontend and backend. Also, you can deploy bitnami's PostgreSQL an
 Kubernetes >= 1.19  
 Helm >= 3
 
+## Quickstart
+
+Default settings should work for you and if you define ingress settings according to your controller (for both API and Frontend), you will be able to access the frontend. Anyway, it won't have any default credentials. In order to create a user, you **have to enable registration** and register a new user.
+
+```yaml
+api:
+  config:
+    service:
+      enableregistration: true
+```
+
+Once you have registered, you can disable registration back if you do not need it.
+
 ## Advanced features
 
 ### Raw resources

@@ -95,6 +95,11 @@ frontend:
   # Useful if you want to set minReadySeconds, progressDeadlineSeconds, strategy
   extraDeploymentSpec: {}
 
+  pdb:
+    enabled: false
+    # maxUnavailable: 50%
+    minAvailable: 50%
+
   imagePullSecrets: []
 
   podAnnotations: {}
@@ -184,8 +189,7 @@ api:
 
   securityContext:
     capabilities:
-      drop:
-      - ALL
+      add: [CAP_CHOWN]
     # readOnlyRootFilesystem: true
     # runAsNonRoot: true
     # runAsUser: 1000
@@ -238,6 +242,11 @@ api:
   # Extra keys to set in deployment.spec.
   # Useful if you want to set minReadySeconds, progressDeadlineSeconds, strategy
   extraDeploymentSpec: {}
+
+  pdb:
+    enabled: false
+    # maxUnavailable: 50%
+    minAvailable: 50%
 
   imagePullSecrets: []
 
