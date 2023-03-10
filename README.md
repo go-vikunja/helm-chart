@@ -116,17 +116,23 @@ Enjoy!
 
 ## Contributing
 
-In order to publish the chart, you have to either use curl or helm cm-push.
+1. Pull all dependencies before packaging.
 
-```shell
-helm package .
-curl --user '<username>:<password>' -X POST --upload-file './<archive>.tgz' https://kolaente.dev/api/packages/vikunja/helm/api/charts
-```
+  ```shell
+  helm dependency update
+  ```
 
-```shell
-helm package .
-helm repo add --username '<username>' --password '<password>' vikunja https://kolaente.dev/api/packages/vikunja/helm
-helm cm-push './<archive>.tgz' vikunja
-```
+2. In order to publish the chart, you have to either use curl or helm cm-push.
 
-As you can see, you do not have to specify the name of the repository, just the name of the organization.
+  ```shell
+  helm package .
+  curl --user '<username>:<password>' -X POST --upload-file './<archive>.tgz' https://kolaente.dev/api/packages/vikunja/helm/api/charts
+  ```
+
+  ```shell
+  helm package .
+  helm repo add --username '<username>' --password '<password>' vikunja https://kolaente.dev/api/packages/vikunja/helm
+  helm cm-push './<archive>.tgz' vikunja
+  ```
+
+  As you can see, you do not have to specify the name of the repository, just the name of the organization.
