@@ -1,0 +1,50 @@
+---
+kind: pipeline
+type: docker
+name: build
+
+trigger:
+  branch:
+    include:
+      - main
+  event:
+    include:
+      - push
+      - pull_request
+
+steps:
+  - name: build
+    image: alpine/helm
+    pull: always
+    commands:
+      - helm dependency update
+      - helm package .
+
+---
+kind: pipeline
+type: docker
+name: release
+
+depends_on:
+  - build
+
+trigger:
+  event:
+    - tag
+
+steps:
+  - name: build
+    image: alpine/helm
+    pull: always
+    environment:
+      HELM_PASSWORD:
+        from_secret: helm_password
+    commands:
+      - helm dependency update
+      - helm package .
+      - curl --user "frederick:$HELM_PASSWORD" -X POST --upload-file './<archive>.tgz' https://kolaente.dev/api/packages/vikunja/helm/api/charts
+---
+kind: signature
+hmac: 6255e5bec10e3e6eeaf92a8b523e04e03a191c13822b829d3361a861c9845fce
+
+...
