@@ -10,8 +10,8 @@ description: |-
   the high alpine areas of the Andes and a relative of the llama.
 annotations:
   category: TaskTracker
-version: 0.1.2
-appVersion: unstable
+version: 0.1.3
+appVersion: 0.20.4
 kubeVersion: ">= 1.19"
 dependencies:
 - name: redis
