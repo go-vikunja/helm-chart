@@ -61,7 +61,7 @@ api:
   config:
     database:
       # Use PostgreSQL database anyway
-      type: postgresql
+      type: postgres
   envFrom:
   # Bind env variables from the secret
   - name: VIKUNJA_DATABASE_USER

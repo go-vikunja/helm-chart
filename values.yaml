@@ -39,12 +39,14 @@ frontend:
     # fsGroup: 1000
 
   securityContext:
+    allowPrivilegeEscalation: false
+    runAsUser: 101 # nginx
     capabilities:
       drop:
       - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
+      add:
+      - NET_BIND_SERVICE
+
 
   service:
     type: ClusterIP
