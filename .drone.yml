@@ -42,9 +42,9 @@ steps:
     commands:
       - helm dependency update
       - helm package .
-      - curl --user "frederick:$HELM_PASSWORD" -X POST --upload-file './<archive>.tgz' https://kolaente.dev/api/packages/vikunja/helm/api/charts
+      - curl --user "frederick:$HELM_PASSWORD" -X POST --upload-file vikunja-*.tgz https://kolaente.dev/api/packages/vikunja/helm/api/charts
 ---
 kind: signature
-hmac: 6255e5bec10e3e6eeaf92a8b523e04e03a191c13822b829d3361a861c9845fce
+hmac: 993135e828384d9938343750ed3164c2ae702b87118d28b74ae3e1f522403f61
 
 ...
