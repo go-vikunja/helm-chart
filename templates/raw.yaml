@@ -1,4 +1,4 @@
-{{- range .Values.vikunja }}
+{{- range .Values.raw }}
 {{- $manifest := include "vikunja.labels" $ | fromYaml | dict "labels" | dict "metadata" | mergeOverwrite . }}
 {{- toYaml $manifest }}
 ---
