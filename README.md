@@ -114,7 +114,22 @@ raw:
 
 Enjoy!
 
-## Contributing
+### Use an existing file volume claim
+
+In the `values.yaml` file, you can configure wether to create the Persistent Volume Claim or use an existing one:
+
+
+```yaml
+    # Specifies whether a PVC should be created
+    create: true
+    # The name of the PVC to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: "" 
+```
+
+This is helpful when migrating from a different k8s chart and want to re-use the existing volume or if you need more control over how the volume is created.
+
+## Publishing
 
 1. Pull all dependencies before packaging.
 
