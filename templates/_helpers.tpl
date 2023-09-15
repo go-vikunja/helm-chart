@@ -93,3 +93,10 @@ Frontend fullname
 {{- define "vikunja.frontendFullname" -}}
 {{- include "vikunja.fullname" . | printf "%s-frontend" | trunc 63 | trimSuffix "-" }}
 {{- end }}
+
+{{/*
+Create the name of the PVC to use
+*/}}
+{{- define "vikunja.pvcName" -}}
+{{- default (include "vikunja.fullname" .) .Values.api.persistence.name }}
+{{- end }}

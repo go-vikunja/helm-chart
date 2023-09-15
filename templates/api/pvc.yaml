@@ -1,8 +1,8 @@
-{{- if .Values.api.persistence.enabled }}
+{{- if and .Values.api.persistence.enabled .Values.api.persistence.create }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include "vikunja.apiFullname" . }}
+  name: {{ include "vikunja.pvcName" . }}
   labels:
     {{- include "vikunja.labels" . | nindent 4 }}
 spec:

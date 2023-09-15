@@ -107,7 +107,7 @@ spec:
       {{- if .Values.api.persistence.enabled }}
       - name: storage
         persistentVolumeClaim:
-          claimName: {{ include "vikunja.apiFullname" . }}
+          claimName: {{ include "vikunja.pvcName" . }}
       {{- end }}
       {{- with .Values.api.extraVolumes }}
       {{- toYaml . | nindent 6 }}
