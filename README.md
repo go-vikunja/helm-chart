@@ -1,33 +1,41 @@
 Vikunja Helm Chart
 ===
 
-Deployes both frontend and backend. Also, you can deploy bitnami's PostgreSQL and Redis as subcharts if you want.
+Customizable deployment of frontend and api.
+Deploys bitnami's PostgreSQL and Redis as subcharts if you want.
 
 ## Requirements
 
-Kubernetes >= 1.19  
-Helm >= 3
+- Kubernetes >= 1.19  
+- Helm >= 3
 
 ## Quickstart
 
-Default settings should work for you and if you define ingress settings according to your controller (for both API and Frontend), you will be able to access the frontend. Anyway, it won't have any default credentials. In order to create a user, you **have to enable registration** and register a new user.
+Define ingress settings according to your controller (for both API and Frontend) to access the application.
+You can set all Vikunja API options as yaml under `api.config`: https://vikunja.io/docs/config-options
 
-```yaml
-api:
-  config:
-    service:
-      enableregistration: true
-```
-
-Once you have registered, you can disable registration back if you do not need it.
+See [values.yaml](./values.yaml#L140) for examples.
 
 ## Advanced features
 
+### Replicas
+
+Both Frontend and API can be configured to have replicas including autoscaling.
+When replicating the API, make sure to set up the redis cache as well
+by setting `api.config.keyvalue.type` to `redis`,
+configuring the redis subchart (see [values.yaml](./values.yaml#L280))
+and the connection to Vikunja:
+https://vikunja.io/docs/config-options/#redis
+
 ### Raw resources
 
-Often happens, that you have to deploy some cloud-specific resources that are not a part of the application chart itself. You have to either create an extra chart for that, or manage them with other tools (kustomize, plain manifests etc.). That is painful. We have a solution. If you want to create anything that is not present in the chart, *just add it in raw*!
+Sometimes you have to deploy some cloud-specific resources that are not a part of the application chart itself.
+You have to either create an extra chart for that, or manage them with other tools (kustomize, plain manifests etc.).
+That is painful. We have a solution. If you want to create anything that is not present in the chart, *just add it in raw*!
 
-Let's say, you are hosted in [GKE](https://cloud.google.com/kubernetes-engine) and want to use Google-managed TLS certificates. In order to do that, you have to create a ManagedCertificate resource. It can be done this way.
+Let's say, you are hosted in [GKE](https://cloud.google.com/kubernetes-engine) 
+and want to use Google-managed TLS certificates.
+In order to do that, you have to create a ManagedCertificate resource:
 
 ```yaml
 frontend:
@@ -51,7 +59,9 @@ raw:
     - example.com
 ```
 
-Or, let's say, you have decided to use Google SQL database instead of self-hosted, and placed credentials in Google Secret Manager. You plan to use [ExternalSecrets](https://external-secrets.io/v0.7.2/) to get that credentials. These can be easily integrated as well.
+Or, let's say, you have decided to use Google SQL database instead of self-hosted, and placed credentials in Google Secret Manager.
+You plan to use [ExternalSecrets](https://external-secrets.io/v0.7.2/) to store the credentials. 
+These can be easily integrated as well.
 
 ```yaml
 # Disable embedded database
@@ -116,8 +126,7 @@ Enjoy!
 
 ### Use an existing file volume claim
 
-In the `values.yaml` file, you can configure wether to create the Persistent Volume Claim or use an existing one:
-
+In the `values.yaml` file, you can configure whether to create the Persistent Volume Claim or use an existing one:
 
 ```yaml
     # Specifies whether a PVC should be created
@@ -127,9 +136,13 @@ In the `values.yaml` file, you can configure wether to create the Persistent Vol
     name: "" 
 ```
 
-This is helpful when migrating from a different k8s chart and want to re-use the existing volume or if you need more control over how the volume is created.
+This is helpful when migrating from a different k8s chart and to re-use the existing volume 
+or if you need more control over how the volume is created.
 
 ## Publishing
+
+The following steps are automatically performed when a git tag for a new version is pushed to the repository.
+They are only listed here for reference.
 
 1. Pull all dependencies before packaging.
 

@@ -27,8 +27,6 @@ frontend:
   # Public API URL that client's browser will reach
   apiUrl: ""
 
-  replicaCount: 1
-
   image:
     repository: vikunja/frontend
     pullPolicy: IfNotPresent
@@ -81,6 +79,8 @@ frontend:
     # requests:
     #   cpu: 100m
     #   memory: 128Mi
+
+  replicaCount: 1
 
   autoscaling:
     enabled: false
@@ -138,39 +138,13 @@ frontend:
 #  ┘ ┘┘  ┘
 
 api:
-  # Values for this config are described here https://vikunja.io/docs/config-options/
+  # Everything under this key is loaded into a native Vikunja yaml config: https://vikunja.io/docs/config-options/
   config:
-    service:
-      JWTSecret: ""
-      interface: ":3456"
-      frontendurl: ""
-      enableregistration: false
-      timezone: GMT
     database:
       type: sqlite
       path: /sqlite/vikunja.db
-    cache:
-      enabled: true
-      type: redis
-    redis:
-      enabled: false
-      host: ""
-      password: ""
-      db: 0
-    cors:
-      enable: false
-      origins: []
-    mailer:
-      enabled: false
-    log:
-      path: null
     files:
       basepath: /files
-    defaultsettings:
-      avatar_provider: gravatar
-      discoverable_by_name: true
-      discoverable_by_email: true
-      week_start: 1
   
   persistence:
     enabled: false
@@ -185,8 +159,6 @@ api:
       #   requests:
       #     storage: 1Gi
       # storageClassName: openebs-hostpath
-
-  replicaCount: 1
 
   image:
     repository: vikunja/api
@@ -234,6 +206,8 @@ api:
     # requests:
     #   cpu: 100m
     #   memory: 128Mi
+
+  replicaCount: 1
 
   autoscaling:
     enabled: false
@@ -289,12 +263,13 @@ api:
 
   envFrom: {}
 
-#  ┬─┐┌─┐┐─┐┌┐┐┌─┐┬─┐┬─┐┐─┐┐─┐┬  
-#  │─┘│ │└─┐ │ │ ┬│┬┘├─ └─┐│ ││  
+#  ┬─┐┌─┐┐─┐┌┐┐┌─┐┬─┐┬─┐┐─┐┐─┐┬
+#  │─┘│ │└─┐ │ │ ┬│┬┘├─ └─┐│ ││
 #  ┘  ┘─┘──┘ ┘ ┘─┘┘└┘┴─┘──┘└─\┘─┘
 
 postgresqlEnabled: false
 # Please refer to PostgreSQL subchart for a full list of possible values
+# https://github.com/bitnami/charts/tree/main/bitnami/postgresql/#parameters
 postgresql: {}
 
 #  ┬─┐┬─┐┬─┐o┐─┐
@@ -303,6 +278,7 @@ postgresql: {}
 
 redisEnabled: false
 # Please refer to Redis subchart for a full list of possible values
+# https://github.com/bitnami/charts/tree/main/bitnami/redis/#parameters
 redis: {}
 
 #  ┬─┐┬─┐┐ ┬
