@@ -15,19 +15,24 @@ appVersion: 0.21.0
 kubeVersion: ">= 1.19"
 dependencies:
 - name: redis
-  version: 17.5.1
   repository: https://charts.bitnami.com/bitnami
-  condition: redisEnabled
+  version: 17.11.6
+  condition: redis.enabled
 - name: postgresql
   version: 12.1.9
   repository: https://charts.bitnami.com/bitnami
-  condition: postgresqlEnabled
+  condition: postgresql.enabled
+- name: common
+  repository: https://bjw-s.github.io/helm-charts
+  version: 1.5.1
 keywords:
 - vikunja
 - todo
 - to-do
 - task
 - tack-tracker
+- project-management
+- self-hosted
 maintainers:
 - name: Vikunja
   url: https://vikunja.io

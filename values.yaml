@@ -1,289 +1,140 @@
-#  ┐ ┬o┬┌ ┬ ┐┌┐┐  ┬┬─┐
-#  │┌┘│├┴┐│ ││││┌ ││─┤
-#  └┘ ┘┘ ┘┘─┘┘└┘└─┘┘ ┘
+## This chart relies on the common library chart from bjw-s
+## You can find it and the values you can provide and modify, at https://github.com/bjw-s/helm-charts/tree/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common
+## Here's the link to the values.yaml file: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml
+## Refer there for more detail about the supported values.
+## Any values that you find in the above `values.yaml` can be provided to this chart and are then rendered.
 
-nameOverride: ""
-fullnameOverride: ""
+image:
+  tag: 0.21.0
 
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # Extra labels
-  extraLabels: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
-# Extra labels that will be added to all resources
-extraLabels: {}
-
-#  ┬─┐┬─┐┌─┐┌┐┐┌┐┐┬─┐┌┐┐┬─┐
-#  ├─ │┬┘│ ││││ │ ├─ ││││ │
-#  ┘  ┘└┘┘─┘┘└┘ ┘ ┴─┘┘└┘┘─┘
-
-frontend:
-  # Public API URL that client's browser will reach
-  apiUrl: ""
-
-  image:
-    repository: vikunja/frontend
-    pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
-
-  podSecurityContext: {}
-    # fsGroup: 1000
-
-  securityContext:
-    allowPrivilegeEscalation: false
-    runAsUser: 101 # nginx
-    capabilities:
-      drop:
-      - ALL
-      add:
-      - NET_BIND_SERVICE
-
-
-  service:
-    type: ClusterIP
-    port: 80
-    # If you want to set other fields, like externalName, externalTrafficPolicy, etc.
-    extraSpec: {}
-
-  ingress:
-    enabled: false
-    className: ""
-    annotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
-    hosts:
-      - host: chart-example.local
-        paths:
-          - path: /
-            pathType: ImplementationSpecific
-    tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
-
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
-
-  replicaCount: 1
-
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  initContainers: []
-
-  sidecarContainers: []
-
-  # Extra keys to set in deployment.spec.
-  # Useful if you want to set minReadySeconds, progressDeadlineSeconds, strategy
-  extraDeploymentSpec: {}
-
-  pdb:
-    enabled: false
-    # maxUnavailable: 50%
-    minAvailable: 50%
-
-  imagePullSecrets: []
-
-  podAnnotations: {}
-
-  nodeSelector: {}
-
-  tolerations: []
-
-  affinity: {}
-
-  extraVolumes: []
-
-  extraVolumeMounts: []
-
-  livenessProbe: {}
-    # httpGet:
-    #   path: /ready
-    #   port: http
-  readinessProbe: {}
-    # httpGet:
-    #   path: /ready
-    #   port: http
-  startupProbe: {}
-    # httpGet:
-    #   path: /
-    #   port: http
-
-  env: {}
-
-  envFrom: {}
-
-#  ┬─┐┬─┐o
-#  │─┤│─┘│
-#  ┘ ┘┘  ┘
-
+######################
+# VIKUNJA COMPONENTS #
+######################
+# You can find the default values that this `values.yaml` overrides, in the comment at the top of this file.
 api:
-  # Everything under this key is loaded into a native Vikunja yaml config: https://vikunja.io/docs/config-options/
-  config:
-    database:
-      type: sqlite
-      path: /sqlite/vikunja.db
-    files:
-      basepath: /files
-  
-  persistence:
-    enabled: false
-    # Specifies whether a PVC should be created
-    create: true
-    # The name of the PVC to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
-    spec: {}
-      # accessModes: ["ReadWriteOnce"]
-      # resources:
-      #   requests:
-      #     storage: 1Gi
-      # storageClassName: openebs-hostpath
-
+  enabled: true
   image:
     repository: vikunja/api
+    tag: 0.21.0
     pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
-
-  securityContext:
-    capabilities:
-      add: [CAP_CHOWN]
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
-
-  service:
-    type: ClusterIP
-    port: 80
-    # If you want to set other fields, like externalName, externalTrafficPolicy, etc.
-    extraSpec: {}
-
+  persistence:
+    # This is your Vikunja data will live, you can either let
+    # the chart create a new PVC for you or provide an existing one.
+    data:
+      enabled: true
+      # existingClaim: # your-claim
+      accessMode: ReadWriteOnce
+      size: 10Gi
+      # storageClass: storage-class
   ingress:
+    main:
+      enabled: true
+      annotations:
+        # proxy-body-size is set to 0 to remove the body limit on file uploads
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      hosts:
+        - host: vikunja.local
+          paths:
+            - path: "/api/v1"
+      tls: []
+  configMaps:
+    # The configuration for Vikunja's api.
+    # https://vikunja.io/docs/config-options/
+    config:
+      enabled: true
+      data:
+        config.yml: |
+          # Vikunja needs to know the frontend URL for password reset emails.
+          # So you might need to provide its value, if you're not using an ingress.
+          # service:
+          #   frontendUrl: http://vikunja.local
+
+          typesense:
+            # Typesense will only work if it is enabled below (typesense.enabled).
+            url: "{{ printf "%s-typesense" .Release.Name }}:8108"
+            apiKey: "{{ .Values.typesense.env.TYPESENSE_API_KEY }}"
+          redis:
+            # Redis will only work if it is enabled below (redis.enabled).
+            host: "{{ printf "%s-redis-master" .Release.Name }}:6379"
+            db: "{{ .Release.Name }}"
+  env:
+    # To utilize a secret in the environment variables, you can do something like the following: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L141-L145
+    # You could also use MySQL or SQLite, but we recommend PostgreSQL.
+    # https://vikunja.io/docs/config-options/#type
+    VIKUNJA_DATABASE_TYPE: "postgres"
+    VIKUNJA_DATABASE_USER: "{{ .Values.postgresql.global.postgresql.auth.username }}"
+    VIKUNJA_DATABASE_PASSWORD: "{{ .Values.postgresql.global.postgresql.auth.password }}"
+    VIKUNJA_DATABASE_NAME: "{{ .Values.postgresql.global.postgresql.auth.database }}"
+
+frontend:
+  enabled: true
+  # You can add any of the top-level keys in the common chart's `values.yaml` to override them here.
+  # For example, this values.yaml file overrides the image values, located here:
+  # https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L63-L69
+  image:
+    repository: vikunja/frontend
+    tag: 0.21.0
+    pullPolicy: IfNotPresent
+  # You can use either a `service` or an `ingress` to interact with Vikunja's frontend.
+  # `Ingress` is the recommended option, but you can still set the `service` to
+  # `LoadBalancer` or another service type.
+  # https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L294-L354
+  service:
+    main:
+      type: ClusterIP
+
+  # https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L393-L436
+  ingress:
+    main:
+      enabled: true
+      annotations:
+        # proxy-body-size is set to 0 to remove the body limit on file uploads
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+      hosts:
+        # This is just an example. You should change this to your own domain.
+        - host: vikunja.local
+          paths:
+            - path: "/"
+      tls: []
+  # If you've used the "built-in" ingress in the api section, you don't need to specify VIKUNJA_API_URL as an environment variable here.
+  # If you've used something else, you'll need to provide the URL to the API here.
+  # env:
+  # VIKUNJA_API_URL: http://vikunja.local/api
+
+##########################
+# END VIKUNJA COMPONENTS #
+##########################
+
+# Optional Dependencies
+postgresql:
+  enabled: true
+  global:
+    postgresql:
+      auth:
+        username: vikunja
+        database: vikunja
+        password: vikunja
+
+redis:
+  enabled: false
+  architecture: standalone
+  auth:
     enabled: false
-    className: ""
-    annotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
-    hosts:
-      - host: chart-example.local
-        paths:
-          - path: /
-            pathType: ImplementationSpecific
-    tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
 
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+typesense:
+  enabled: true
+  env:
+    TYPESENSE_DATA_DIR: /data
+    TYPESENSE_API_KEY: typesense
+  persistence:
+    data:
+      # Enabling typesense persistence is recommended to avoid slow reindexing
+      enabled: true
+      accessMode: ReadWriteOnce
+      size: 1Gi
+      # storageClass: storage-class
 
-  replicaCount: 1
-
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 100
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
-
-  initContainers: []
-
-  sidecarContainers: []
-
-  # Extra keys to set in deployment.spec.
-  # Useful if you want to set minReadySeconds, progressDeadlineSeconds, strategy
-  extraDeploymentSpec: {}
-
-  pdb:
-    enabled: false
-    # maxUnavailable: 50%
-    minAvailable: 50%
-
-  imagePullSecrets: []
-
-  podAnnotations: {}
-
-  podSecurityContext: {}
-    # fsGroup: 1000
-
-  nodeSelector: {}
-
-  tolerations: []
-
-  affinity: {}
-
-  extraVolumes: []
-
-  extraVolumeMounts: []
-
-  livenessProbe: {}
-    # httpGet:
-    #   path: /ready
-    #   port: http
-  readinessProbe: {}
-    # httpGet:
-    #   path: /ready
-    #   port: http
-  startupProbe: {}
-    # httpGet:
-    #   path: /
-    #   port: http
-
-  env: {}
-
-  envFrom: {}
-
-#  ┬─┐┌─┐┐─┐┌┐┐┌─┐┬─┐┬─┐┐─┐┐─┐┬
-#  │─┘│ │└─┐ │ │ ┬│┬┘├─ └─┐│ ││
-#  ┘  ┘─┘──┘ ┘ ┘─┘┘└┘┴─┘──┘└─\┘─┘
-
-postgresqlEnabled: false
-# Please refer to PostgreSQL subchart for a full list of possible values
-# https://github.com/bitnami/charts/tree/main/bitnami/postgresql/#parameters
-postgresql: {}
-
-#  ┬─┐┬─┐┬─┐o┐─┐
-#  │┬┘├─ │ ││└─┐
-#  ┘└┘┴─┘┘─┘┘──┘
-
-redisEnabled: false
-# Please refer to Redis subchart for a full list of possible values
-# https://github.com/bitnami/charts/tree/main/bitnami/redis/#parameters
-redis: {}
-
-#  ┬─┐┬─┐┐ ┬
-#  │┬┘│─┤│││
-#  ┘└┘┘ ┘└┴┘
-
-# You can create custom resources from the plaintext definition
-raw: []
+  image:
+    repository: docker.io/typesense/typesense
+    tag: 0.25.1
+    pullPolicy: IfNotPresent

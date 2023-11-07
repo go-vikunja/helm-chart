@@ -1,0 +1,29 @@
+{{- define "vikunja.frontend.hardcodedValues" -}}
+global:
+  nameOverride: frontend
+
+service:
+  main:
+    enabled: true
+    primary: true
+    type: ClusterIP
+    ports:
+      http:
+        enabled: true
+        primary: true
+        port: 80
+        protocol: HTTP
+
+env:
+  {{- if .Values.api.ingress.main.enabled }}
+  VIKUNJA_API_URL: "http://{{ index .Values.api.ingress.main.hosts 0 "host" }}{{ index .Values.api.ingress.main.hosts 0 "path" }}"
+  {{ end }}
+
+{{ end }}
+
+{{ if .Values.frontend.enabled }}
+{{- $ctx := deepCopy . -}}
+{{- $_ := get .Values "frontend" | mergeOverwrite $ctx.Values -}}
+{{- $_ = include "vikunja.frontend.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
+{{- include "bjw-s.common.loader.all" $ctx }}
+{{ end }}

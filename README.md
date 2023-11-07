@@ -1,8 +1,7 @@
 Vikunja Helm Chart
 ===
 
-Customizable deployment of frontend and api.
-Deploys bitnami's PostgreSQL and Redis as subcharts if you want.
+This Helm Chart deploys both the Vikunja [frontend](https://hub.docker.com/r/vikunja/frontend) and Vikunja [api](https://hub.docker.com/r/vikunja/api) containers, in addition to other Kubernetes resources so that you'll have a fully functioning Vikunja deployment quickly. Also, you can deploy Bitnami's [PostgreSQL](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) and [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis) as subcharts if you want, as Vikunja can utilize them as its database and caching mechanism (respectively).
 
 ## Requirements
 
@@ -11,133 +10,80 @@ Deploys bitnami's PostgreSQL and Redis as subcharts if you want.
 
 ## Quickstart
 
-Define ingress settings according to your controller (for both API and Frontend) to access the application.
-You can set all Vikunja API options as yaml under `api.config`: https://vikunja.io/docs/config-options
+The majority of default values defined in `values.yaml` should be compatible for your deployment. Additionally, if you utilize an Ingress for both the API and Frontend, you will be able to access the frontend out of the box. However, it won't have any default credentials. So, you'll need to create an account using the registration button.
 
-See [values.yaml](./values.yaml#L140) for examples.
-
-## Advanced features
-
-### Replicas
-
-Both Frontend and API can be configured to have replicas including autoscaling.
-When replicating the API, make sure to set up the redis cache as well
-by setting `api.config.keyvalue.type` to `redis`,
-configuring the redis subchart (see [values.yaml](./values.yaml#L280))
-and the connection to Vikunja:
-https://vikunja.io/docs/config-options/#redis
-
-### Raw resources
-
-Sometimes you have to deploy some cloud-specific resources that are not a part of the application chart itself.
-You have to either create an extra chart for that, or manage them with other tools (kustomize, plain manifests etc.).
-That is painful. We have a solution. If you want to create anything that is not present in the chart, *just add it in raw*!
-
-Let's say, you are hosted in [GKE](https://cloud.google.com/kubernetes-engine) 
-and want to use Google-managed TLS certificates.
-In order to do that, you have to create a ManagedCertificate resource:
-
-```yaml
-frontend:
-  enabled: true
-  annotations:
-    kubernetes.io/ingress.class: gce
-    networking.gke.io/managed-certificates: gmc-example-com
-  hosts:
-  - host: example.com
-    paths:
-    - path: /
-      pathType: Prefix
-
-raw:
-- apiVersion: networking.gke.io/v1
-  kind: ManagedCertificate
-  metadata:
-    name: gmc-example-com
-  spec:
-    domains:
-    - example.com
-```
-
-Or, let's say, you have decided to use Google SQL database instead of self-hosted, and placed credentials in Google Secret Manager.
-You plan to use [ExternalSecrets](https://external-secrets.io/v0.7.2/) to store the credentials. 
-These can be easily integrated as well.
-
-```yaml
-# Disable embedded database
-postgresqlEnabled: false
-
-api:
-  config:
-    database:
-      # Use PostgreSQL database anyway
-      type: postgres
-  envFrom:
-  # Bind env variables from the secret
-  - name: VIKUNJA_DATABASE_USER
-    valueFrom:
-      secretKeyRef:
-        name: postgresql-credentials
-        key: username
-  - name: VIKUNJA_DATABASE_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: postgresql-credentials
-        key: password
-  - name: VIKUNJA_DATABASE_HOST
-    valueFrom:
-      secretKeyRef:
-        name: postgresql-credentials
-        key: hostname
-  - name: VIKUNJA_DATABASE_DATABASE
-    valueFrom:
-      secretKeyRef:
-        name: postgresql-credentials
-        key: database
-
-raw:
-- apiVersion: external-secrets.io/v1beta1
-  kind: SecretStore
-  metadata:
-    name: gcpsm
-  spec:
-    refreshInterval: 300
-    provider:
-      gcpsm:
-        projectID: my-google-project-id
-
-- apiVersion: external-secrets.io/v1beta1
-  kind: ExternalSecret
-  metadata:
-    name: postgresql-credentials
-  spec:
-    secretStoreRef:
-      kind: SecretStore
-      name: gcpsm
-    target:
-      deletionPolicy: Delete
-    refreshInterval: 5m
-    dataFrom:
-    - extract:
-        key: cloud-sql-credentials
-```
-
-Enjoy!
+That should be it!
 
 ### Use an existing file volume claim
 
-In the `values.yaml` file, you can configure whether to create the Persistent Volume Claim or use an existing one:
+In the `values.yaml` file, you can either define your own existing Persistent Volume Claim (PVC) or have the chart create one on your behalf.
+
+To have the chart use your pre-existing PVC:
 
 ```yaml
-    # Specifies whether a PVC should be created
-    create: true
-    # The name of the PVC to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: "" 
+api:
+  persistence:
+    data:
+      enabled: true
+      existingClaim: <your-claim>
 ```
 
-This is helpful when migrating from a different k8s chart and to re-use the existing volume 
-or if you need more control over how the volume is created.
+To have the chart create one on your behalf:
+
+```yaml
+# You can find the default values 
+api:
+  enabled: true
+  persistence:
+    data:
+      enabled: true
+      accessMode: ReadWriteOnce
+      size: 10Gi
+      storageClass: storage-class
+```
+
+### Modifying Deployed Resources
+
+Often times, modifications need to be made to a Helm chart to allow it to operate in your Kubernetes cluster. By utilizing bjw-s's `common` library, there are quite a few options that can be easily modified.
+
+Anything you see [here](https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml), including the top-level keys, can be added and subtracted from this chart's `values.yaml`, underneath the `api`, `frontend`, and (optionally) `typesense` key.
+
+For example, if you wished to create a `serviceAccount` as can be seen [here](https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L85-L87) for the `api` pod:
+
+```yaml
+api:
+  serviceAccount: 
+    create: true
+```
+
+Then, (for some reason), if you wished to deploy the `frontend` as a `DaemonSet` ([as can be seen here](https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L12-L17)), you could do the following:
+
+```yaml
+frontend:
+  controller:
+    type: daemonset
+```  
+
+### Another Example of Modifying `config.yml` (Enabling Registration)
+
+You can disable registration (if you do not with to allow others to register on your Vikunja), by providing the following values in your `values.yaml`:
+
+```yaml
+api:
+  configMaps:
+    config:
+      enabled: true
+      data:
+        config.yml:
+          service:
+            enableregistration: false
+```
+
+If you need to create another user, you could opt to execute the following command on the `api` container:
+
+```bash
+./vikunja user create --email <user@email.com> --user <user1> --password <password123>
+```
 
 ## Publishing
 
