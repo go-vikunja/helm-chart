@@ -39,7 +39,69 @@ api:
       enabled: true
       accessMode: ReadWriteOnce
       size: 10Gi
+      mountPath: /app/vikunja/files
       storageClass: storage-class
+```
+
+### Utilizing environment variables from Kubernetes secrets
+
+Each environment variable that is "injected" into a pod can be sourced from a Kubernetes secret. This is useful when you wish to add values that you would rather keep as secrets in your GitOps repo, as environment variables in the pods.
+
+Assuming that you had a Kubernetes secret named `vikunja-env`, this is how you would add the value stored at key `VIKUNJA_DATABASE_PASSWORD` as the environment variable named `VIKUNJA_DATABASE_PASSWORD`:
+
+```yaml
+api:
+  env:
+    VIKUNJA_DATABASE_PASSWORD:
+      valueFrom:
+        secretKeyRef:
+          name: vikunja-env
+          key: VIKUNJA_DATABASE_PASSWORD
+    VIKUNJA_DATABASE_USERNAME: "db-user"
+```
+
+Alternatively, instead of defining each and every key, if the keys within the secret are the names of environment variables, you could also do the following:
+
+```yaml
+api:
+  envFrom:
+    - secretRef:
+      name: vikunja-secret-env
+  env:
+    VIKUNJA_DATABASE_USERNAME: "db-user"
+```
+
+This will add all keys within the Kubernetes secret named `vikunja-secret-env` as environment variables to the `api` pod. Additionally, if you did not have the key `VIKUNJA_DATABASE_USERNAME` in the `vikunja-secret-env` secret, you could still define it as an environment variable seen above.
+
+How the `envFrom` key works can be seen [here](https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L155).
+
+### Utilizing a Kubernetes secret as the `config.yml` file instead of a ConfigMap
+
+If you did not wish to use the ConfigMap provided by the chart, and instead wished to mount your own Kubernetes secret as the `config.yml` file in the `api` pod, you could provide values such as the following (assuming `asdf-my-custom-secret1` was the name of the secret that had the `config.yml` file):
+
+```yaml
+api:
+  persistence:
+    config:
+      type: secret
+      name: asdf-my-custom-secret1
+```
+
+Then your secret should look something like the following so that it will mount properly:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: asdf-my-custom-secret1
+  namespace: vikunja
+type: Opaque
+stringData:
+  config.yml: |
+    key1: value1
+    key2: value2
+    key3: value3
+
 ```
 
 ### Modifying Deployed Resources
