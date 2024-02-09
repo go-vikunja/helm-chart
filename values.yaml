@@ -97,16 +97,21 @@ frontend:
           paths:
             - path: "/"
       tls: []
-  # If you've used the "built-in" ingress in the api section, you don't need to specify VIKUNJA_API_URL as an environment variable here.
-  # If you've used something else, you'll need to provide the URL to the API here.
-  # env:
-  # VIKUNJA_API_URL: http://vikunja.local/api
+  # You only need to provide the URL to the API as environment variable here if you deviate from the "built-in" ingress in the api section.
+  #env:
+  #  VIKUNJA_API_URL: http://vikunja.local/api
 
 ##########################
 # END VIKUNJA COMPONENTS #
 ##########################
 
 # Optional Dependencies
+
+#  ┬─┐┌─┐┐─┐┌┐┐┌─┐┬─┐┬─┐┐─┐┐─┐┬
+#  │─┘│ │└─┐ │ │ ┬│┬┘├─ └─┐│ ││
+#  ┘  ┘─┘──┘ ┘ ┘─┘┘└┘┴─┘──┘└─\┘─┘
+# Please refer to PostgreSQL subchart for a full list of possible values
+# https://github.com/bitnami/charts/tree/main/bitnami/postgresql/#parameters
 postgresql:
   enabled: true
   global:
@@ -116,6 +121,11 @@ postgresql:
         database: vikunja
         password: vikunja
 
+#  ┬─┐┬─┐┬─┐o┐─┐
+#  │┬┘├─ │ ││└─┐
+#  ┘└┘┴─┘┘─┘┘──┘
+# Please refer to Redis subchart for a full list of possible values
+# https://github.com/bitnami/charts/tree/main/bitnami/redis/#parameters
 redis:
   enabled: false
   architecture: standalone
