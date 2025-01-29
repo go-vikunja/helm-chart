@@ -4,19 +4,15 @@
 ## Refer there for more detail about the supported values.
 ## Any values that you find in the above `values.yaml` can be provided to this chart and are then rendered.
 
-image:
-  tag: 0.21.0
-
 ######################
 # VIKUNJA COMPONENTS #
 ######################
 # You can find the default values that this `values.yaml` overrides, in the comment at the top of this file.
-api:
-  enabled: true
+vikunja:
   image:
-    repository: vikunja/api
-    tag: 0.21.0
-    pullPolicy: IfNotPresent
+    repository: vikunja/vikunja
+    #tag: "latest"
+    #pullPolicy: Always
   persistence:
     # This is your Vikunja data will live, you can either let
     # the chart create a new PVC for you or provide an existing one.
@@ -36,20 +32,15 @@ api:
       hosts:
         - host: vikunja.local
           paths:
-            - path: "/api/v1"
+            - path: /
       tls: []
   configMaps:
-    # The configuration for Vikunja's api.
+    # The configuration for Vikunja's api
     # https://vikunja.io/docs/config-options/
-    config:
+    api-config:
       enabled: true
       data:
         config.yml: |
-          # Vikunja needs to know the frontend URL for password reset emails.
-          # So you might need to provide its value, if you're not using an ingress.
-          # service:
-          #   frontendUrl: http://vikunja.local
-
           typesense:
             # Typesense will only work if it is enabled below (typesense.enabled).
             url: "{{ printf "%s-typesense" .Release.Name }}:8108"
@@ -63,43 +54,9 @@ api:
     # You could also use MySQL or SQLite, but we recommend PostgreSQL.
     # https://vikunja.io/docs/config-options/#type
     VIKUNJA_DATABASE_TYPE: "postgres"
-    VIKUNJA_DATABASE_USER: "{{ .Values.postgresql.global.postgresql.auth.username }}"
-    VIKUNJA_DATABASE_PASSWORD: "{{ .Values.postgresql.global.postgresql.auth.password }}"
-    VIKUNJA_DATABASE_NAME: "{{ .Values.postgresql.global.postgresql.auth.database }}"
-
-frontend:
-  enabled: true
-  # You can add any of the top-level keys in the common chart's `values.yaml` to override them here.
-  # For example, this values.yaml file overrides the image values, located here:
-  # https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L63-L69
-  image:
-    repository: vikunja/frontend
-    tag: 0.21.0
-    pullPolicy: IfNotPresent
-  # You can use either a `service` or an `ingress` to interact with Vikunja's frontend.
-  # `Ingress` is the recommended option, but you can still set the `service` to
-  # `LoadBalancer` or another service type.
-  # https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L294-L354
-  service:
-    main:
-      type: ClusterIP
-
-  # https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L393-L436
-  ingress:
-    main:
-      enabled: true
-      annotations:
-        # proxy-body-size is set to 0 to remove the body limit on file uploads
-        nginx.ingress.kubernetes.io/proxy-body-size: "0"
-      hosts:
-        # This is just an example. You should change this to your own domain.
-        - host: vikunja.local
-          paths:
-            - path: "/"
-      tls: []
-  # You only need to provide the URL to the API as environment variable here if you deviate from the "built-in" ingress in the api section.
-  #env:
-  #  VIKUNJA_API_URL: http://vikunja.local/api
+    VIKUNJA_DATABASE_USER: "{{ coalesce .Values.postgresql.global.postgresql.auth.username .Values.postgresql.auth.username }}"
+    VIKUNJA_DATABASE_PASSWORD: "{{ coalesce .Values.postgresql.global.postgresql.auth.password .Values.postgresql.auth.password }}"
+    VIKUNJA_DATABASE_NAME: "{{ coalesce .Values.postgresql.global.postgresql.auth.database .Values.postgresql.auth.database }}"
 
 ##########################
 # END VIKUNJA COMPONENTS #
@@ -114,12 +71,13 @@ frontend:
 # https://github.com/bitnami/charts/tree/main/bitnami/postgresql/#parameters
 postgresql:
   enabled: true
-  global:
-    postgresql:
-      auth:
-        username: vikunja
-        database: vikunja
-        password: vikunja
+  primary:
+    networkPolicy:
+      enabled: false
+  auth:
+    username: vikunja
+    database: vikunja
+    password: vikunja
 
 #  ┬─┐┬─┐┬─┐o┐─┐
 #  │┬┘├─ │ ││└─┐

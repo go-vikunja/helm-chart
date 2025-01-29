@@ -1,9 +1,7 @@
-{{- define "vikunja.api.hardcodedValues" -}}
-global:
-  nameOverride: api
-
+{{- define "vikunja.vikunja.hardcodedValues" -}}
 service:
   main:
+    controller: main
     enabled: true
     primary: true
     type: ClusterIP
@@ -13,6 +11,9 @@ service:
         primary: true
         port: 3456
         protocol: HTTP
+
+podSecurityContext:
+  fsGroup: 1000
 
 persistence:
   config:
@@ -46,23 +47,9 @@ env:
 {{ if .Values.typesense.enabled }}
   VIKUNJA_TYPESENSE_ENABLED: "true"
 {{ end }}
-{{ if and .Values.frontend.ingress.enabled .Values.api.configMaps.config.enabled}}
-  # The configuration for Vikunja's api.
-  # https://vikunja.io/docs/config-options/
-  VIKUNJA_SERVICE_FRONTENDURL: "http://{{ index .Values.frontend.ingress.main.hosts 0 "host" }}{{ index .Values.frontend.ingress.main.hosts 0 "path" }}"
 {{ end }}
 
-# Logic to decide what the api URL should be
-{{ if .Values.frontend.ingress.enabled }}
-  VIKUNJA_FRONTEND_URL: "http://{{ index .Values.frontend.ingress.main.hosts 0 "host" }}{{ index .Values.frontend.ingress.main.hosts 0 "path" }}"
-{{ end }}
-{{ end }}
-
-
-
-{{ if .Values.api.enabled }}
 {{- $ctx := deepCopy . -}}
-{{- $_ := get .Values "api" | mergeOverwrite $ctx.Values -}}
-{{- $_ = include "vikunja.api.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
+{{- $_ := get .Values "vikunja" | mergeOverwrite $ctx.Values -}}
+{{- $_ = include "vikunja.vikunja.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
 {{- include "bjw-s.common.loader.all" $ctx }}
-{{ end }}

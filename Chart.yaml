@@ -2,25 +2,25 @@ apiVersion: v2
 type: application
 name: vikunja
 home: https://kolaente.dev/vikunja/helm-chart
-icon: https://kolaente.dev/vikunja/helm-chart/raw/commit/d1f609a6c4b4d06c793611f3af812c98e07d502b/icon.png
+icon: https://kolaente.dev/vikunja/helm-chart/raw/main/icon.png
 deprecated: false
 description: |-
   The open-source, self-hostable to-do app. Organize everything, on all platforms.
-  Also one of the two wild South American camelids which live in
-  the high alpine areas of the Andes and a relative of the llama.
 annotations:
   category: TaskTracker
-version: 0.4.3
-appVersion: 0.21.0
+version: 1.0.0
+appVersion: 0.24.6
 kubeVersion: ">= 1.19"
 dependencies:
 - name: redis
   repository: https://charts.bitnami.com/bitnami
-  version: 17.11.6
+  # TODO Consider switch to valkey - staying with pre-fork redis 7.2.4 for now
+  version: 18.6.3
   condition: redis.enabled
 - name: postgresql
-  version: 12.1.9
   repository: https://charts.bitnami.com/bitnami
+  # https://github.com/bitnami/charts/blob/main/bitnami/postgresql/Chart.yaml
+  version: 16.4.5 # Postgres 17.2
   condition: postgresql.enabled
 - name: common
   repository: https://bjw-s.github.io/helm-charts
@@ -30,15 +30,12 @@ keywords:
 - todo
 - to-do
 - task
-- tack-tracker
+- task-tracker
 - project-management
 - self-hosted
 maintainers:
 - name: Vikunja
   url: https://vikunja.io
-- name: Yurii Vlasov
-  email: yuriy@vlasov.pro
-  url: https://vlasov.pro
 sources:
 - https://kolaente.dev/vikunja/helm-chart
 - https://vikunja.io
