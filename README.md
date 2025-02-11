@@ -1,37 +1,37 @@
 # Vikunja Helm Chart
 
 This Helm Chart deploys the [Vikunja](https://hub.docker.com/r/vikunja/vikunja) container
-in addition to other Kubernetes resources to quickly create a full-featured Vikunja deployment.
+in addition to other Kubernetes resources for a full-featured Vikunja deployment.
 This includes Bitnami's [PostgreSQL](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) 
 and [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis) as subcharts if you want,
 so Vikunja can use them as database and cache respectively.
 
-See https://artifacthub.io/packages/helm/vikunja/vikunja for version information 
-and installation instructions.
+See https://artifacthub.io/packages/helm/vikunja/vikunja 
+for version information and installation instructions.
 
 ## Upgrading to v1
 
 Both Vikunja containers got merged into one with Vikunja version 0.23.
 A separate `frontend` configuration is now obsolete,
 so deleting that and renaming the key `api` to `vikunja`
-should mostly "just work".
-The only other major change is the `configMaps.config` key
-which was changed to `api-config` to continuously reflect
-that it only applies to the API.
-The Configmap name in the cluster thus stays the same.
+should "just work".
+The only other major change is that the `configMaps.config` key was renamed to `api-config` 
+to highlight again that it only applies to the API.
+The Configmap name in the cluster stays the same.
 
 ## Quickstart
 
 Define ingress settings according to your controller to access the application.
-You can configure Vikunja API options as yaml under `vikunja.configMaps.config.data.config.yml`:
+You can configure Vikunja API options as yaml under `vikunja.configMaps.api-config.data.config.yml`:
 https://vikunja.io/docs/config-options
 
-For example, you can disable registration (if you do not with to allow others to register on your Vikunja), by providing the following values in your `values.yaml`:
+For example, you can disable registration (if you do not with to allow others to register on your Vikunja),
+by providing the following values in your `values.yaml`:
 
 ```yaml
 vikunja:
   configMaps:
-    config:
+    api-config:
       enabled: true
       data:
         config.yml:
@@ -51,7 +51,7 @@ You can still create new users by executing the following command in the `vikunj
 
 To effectively run multiple replicas of the API, 
 make sure to set up the redis cache as well
-by setting `vikunja.configMaps.config.data.config.yml.keyvalue.type` to `redis`,
+by setting `vikunja.configMaps.api-config.data.config.yml.keyvalue.type` to `redis`,
 configuring the redis subchart (see [values.yaml](./values.yaml#L119))
 and the connection [in Vikunja](https://vikunja.io/docs/config-options/#redis)
 
@@ -147,7 +147,6 @@ stringData:
     key1: value1
     key2: value2
     key3: value3
-
 ```
 
 ### Modifying Deployed Resources

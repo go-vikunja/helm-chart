@@ -14,13 +14,13 @@ vikunja:
     #tag: "latest"
     #pullPolicy: Always
   persistence:
-    # This is your Vikunja data will live, you can either let
-    # the chart create a new PVC for you or provide an existing one.
+    # This is where your Vikunja data lives,
+    # provide an existing PVC or let one be autocreated
     data:
       enabled: true
       # existingClaim: # your-claim
       accessMode: ReadWriteOnce
-      size: 10Gi
+      size: 2Gi
       mountPath: /app/vikunja/files
       # storageClass: storage-class
   ingress:
@@ -42,12 +42,14 @@ vikunja:
       data:
         config.yml: |
           typesense:
-            # Typesense will only work if it is enabled below (typesense.enabled).
-            url: "{{ printf "%s-typesense" .Release.Name }}:8108"
+            # These configuration values will automatically apply
+            # if the integrated Typesense is enabled below (typesense.enabled)
+            url: "http://{{ printf "%s-typesense" .Release.Name }}:8108"
             apiKey: "{{ .Values.typesense.env.TYPESENSE_API_KEY }}"
           redis:
-            # Redis will only work if it is enabled below (redis.enabled).
-            host: "{{ printf "%s-redis-master" .Release.Name }}:6379"
+            # These configuration values will automatically apply
+            # if the integrated Redis is enabled below (redis.enabled)
+            host: "http://{{ printf "%s-redis-master" .Release.Name }}:6379"
             db: "{{ .Release.Name }}"
   env:
     # To utilize a secret in the environment variables, you can do something like the following: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L141-L145
