@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    tags:
+      - v*
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: azure/setup-helm@v4.3.0
+
+      - name: build
+        run: |
+          helm dependency update
+          helm package .
+
+      - name: Push to Github Container Registry (OCI)
+        if: ${{ github.ref_type == 'tag' || github.ref_name == 'main' }}
+        shell: bash
+        env:
+          REGISTRY: ghcr.io/go-vikunja/helm-chart
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login "ghcr.io" --username "${GITHUB_ACTOR}" --password-stdin
+          helm push vikunja-*.tgz oci://${REGISTRY}

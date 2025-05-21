@@ -23,7 +23,7 @@ dependencies:
   version: 16.4.5 # Postgres 17.2
   condition: postgresql.enabled
 - name: common
-  repository: https://bjw-s.github.io/helm-charts
+  repository: https://bjw-s-labs.github.io/helm-charts
   version: 1.5.1
 keywords:
 - vikunja
@@ -37,5 +37,5 @@ maintainers:
 - name: Vikunja
   url: https://vikunja.io
 sources:
-- https://kolaente.dev/vikunja/helm-chart
+- https://github.com/go-vikunja/helm-chart
 - https://vikunja.io

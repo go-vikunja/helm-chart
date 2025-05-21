@@ -1,3 +1,4 @@
 charts/*.tgz
 *.tgz
 output.yaml
+/cr
