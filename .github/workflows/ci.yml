@@ -28,7 +28,7 @@ jobs:
           helm package .
 
       - name: Push to Github Container Registry (OCI)
-        if: ${{ github.ref_type == 'tag' || github.ref_name == 'main' }}
+        if: ${{ github.ref_type == 'tag' }}
         shell: bash
         env:
           REGISTRY: ghcr.io/go-vikunja/helm-chart
