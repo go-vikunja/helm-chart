@@ -21,9 +21,37 @@ The Configmap name in the cluster stays the same.
 
 ## Quickstart
 
+The Helm chart is published to GitHub Container Registry. To install it:
+
+1. Add the Helm repository:
+
+```bash
+helm repo add vikunja oci://ghcr.io/go-vikunja/helm-chart
+helm repo update
+```
+
+2. Install the chart:
+
+```bash
+helm install vikunja vikunja/vikunja -f values.yaml
+```
+
 Define ingress settings according to your controller to access the application.
 You can configure Vikunja API options as yaml under `vikunja.configMaps.api-config.data.config.yml`:
 https://vikunja.io/docs/config-options
+
+For minimal configuration, your `values.yaml` should at least set up ingress:
+
+```yaml
+vikunja:
+  ingress:
+    main:
+      enabled: true
+      hosts:
+        - host: your-domain.com
+          paths:
+            - path: /
+```
 
 For example, you can disable registration (if you do not with to allow others to register on your Vikunja),
 by providing the following values in your `values.yaml`:
@@ -43,6 +71,12 @@ You can still create new users by executing the following command in the `vikunj
 
 ```bash
 ./vikunja user create --email <user@email.com> --user <user1> --password <password123>
+```
+
+To upgrade an existing installation:
+
+```bash
+helm upgrade vikunja vikunja/vikunja -f values.yaml
 ```
 
 ## Advanced Features
