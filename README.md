@@ -1,5 +1,8 @@
 # Vikunja Helm Chart
 
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/vikunja)](https://artifacthub.io/packages/search?repo=vikunja)
+[![CI](https://github.com/go-vikunja/helm-chart/actions/workflows/ci.yml/badge.svg)](https://github.com/go-vikunja/helm-chart/actions/workflows/ci.yml)
+
 This Helm Chart deploys the [Vikunja](https://hub.docker.com/r/vikunja/vikunja) container
 in addition to other Kubernetes resources for a full-featured Vikunja deployment.
 This includes Bitnami's [PostgreSQL](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) 
