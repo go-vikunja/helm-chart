@@ -175,17 +175,17 @@ They are only listed here for reference.
   helm dependency update
   ```
 
-2. In order to publish the chart, you have to either use curl or helm cm-push.
+2. Package the Helm chart.
 
   ```shell
   helm package .
-  curl --user '<username>:<password>' -X POST --upload-file './<archive>.tgz' https://kolaente.dev/api/packages/vikunja/helm/api/charts
   ```
+
+3. Push the package to GitHub Container Registry (OCI).
 
   ```shell
-  helm package .
-  helm repo add --username '<username>' --password '<password>' vikunja https://kolaente.dev/api/packages/vikunja/helm
-  helm cm-push './<archive>.tgz' vikunja
+  echo "$TOKEN" | helm registry login "ghcr.io" --username "$USERNAME" --password-stdin
+  helm push vikunja-*.tgz oci://ghcr.io/go-vikunja/helm-chart
   ```
 
-  As you can see, you do not have to specify the name of the repository, just the name of the organization.
+The Helm chart is available at `oci://ghcr.io/go-vikunja/helm-chart`.
