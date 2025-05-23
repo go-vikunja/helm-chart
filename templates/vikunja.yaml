@@ -12,6 +12,8 @@ service:
         port: 3456
         protocol: HTTP
 
+enableServiceLinks: false
+
 podSecurityContext:
   fsGroup: 1000
 
