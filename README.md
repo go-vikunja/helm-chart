@@ -28,7 +28,7 @@ The Helm chart is published to [GitHub Container Registry](https://github.com/go
 
 
 ```bash
-helm install vikunja oci://ghcr.io/go-vikunja/helm-chart -f values.yaml
+helm install vikunja oci://ghcr.io/go-vikunja/helm-chart/vikunja -f values.yaml
 ```
 
 or, if you want to install it in a namespace:
@@ -38,7 +38,7 @@ helm install \
   --create-namespace \
   --namespace vikunja \
   vikunja \
-  oci://ghcr.io/go-vikunja/helm-chart \
+  oci://ghcr.io/go-vikunja/helm-chart/vikunja \
   -f values.yaml
 ```
 
