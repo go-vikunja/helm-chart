@@ -31,6 +31,17 @@ The Helm chart is published to [GitHub Container Registry](https://github.com/go
 helm install vikunja oci://ghcr.io/go-vikunja/helm-chart -f values.yaml
 ```
 
+or, if you want to install it in a namespace:
+
+```bash
+helm install \
+  --create-namespace \
+  --namespace vikunja \
+  vikunja \
+  oci://ghcr.io/go-vikunja/helm-chart \
+  -f values.yaml
+```
+
 Define ingress settings according to your controller to access the application.
 You can configure Vikunja API options as yaml under `vikunja.configMaps.api-config.data.config.yml`:
 https://vikunja.io/docs/config-options
