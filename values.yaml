@@ -56,6 +56,7 @@ vikunja:
     # You could also use MySQL or SQLite, but we recommend PostgreSQL.
     # https://vikunja.io/docs/config-options/#type
     VIKUNJA_DATABASE_TYPE: "postgres"
+    VIKUNJA_DATABASE_HOST: "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local:{{ coalesce .Values.postgresql.global.postgresql.service.ports.postgresql .Values.postgresql.service.ports.postgresql }}"
     VIKUNJA_DATABASE_USER: "{{ coalesce .Values.postgresql.global.postgresql.auth.username .Values.postgresql.auth.username }}"
     VIKUNJA_DATABASE_PASSWORD: "{{ coalesce .Values.postgresql.global.postgresql.auth.password .Values.postgresql.auth.password }}"
     VIKUNJA_DATABASE_NAME: "{{ coalesce .Values.postgresql.global.postgresql.auth.database .Values.postgresql.auth.database }}"
