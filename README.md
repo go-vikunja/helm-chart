@@ -24,19 +24,22 @@ The Configmap name in the cluster stays the same.
 
 ## Quickstart
 
-The Helm chart is published to GitHub Container Registry. To install it:
+The Helm chart is published to [GitHub Container Registry](https://github.com/go-vikunja/helm-chart/pkgs/container/helm-chart%2Fvikunja). To install it:
 
-1. Add the Helm repository:
 
 ```bash
-helm repo add vikunja oci://ghcr.io/go-vikunja/helm-chart
-helm repo update
+helm install vikunja oci://ghcr.io/go-vikunja/helm-chart/vikunja -f values.yaml
 ```
 
-2. Install the chart:
+or, if you want to install it in a namespace:
 
 ```bash
-helm install vikunja vikunja/vikunja -f values.yaml
+helm install \
+  --create-namespace \
+  --namespace vikunja \
+  vikunja \
+  oci://ghcr.io/go-vikunja/helm-chart/vikunja \
+  -f values.yaml
 ```
 
 Define ingress settings according to your controller to access the application.
