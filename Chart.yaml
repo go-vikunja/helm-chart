@@ -8,7 +8,7 @@ description: |-
   The open-source, self-hostable to-do app. Organize everything, on all platforms.
 annotations:
   category: TaskTracker
-version: 1.0.0
+version: 1.1.0
 appVersion: 0.24.6
 kubeVersion: ">= 1.19"
 dependencies:
