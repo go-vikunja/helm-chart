@@ -81,6 +81,9 @@ postgresql:
     username: vikunja
     database: vikunja
     password: vikunja
+  service:
+    ports:
+      postgresql: 5432
 
 #  ┬─┐┬─┐┬─┐o┐─┐
 #  │┬┘├─ │ ││└─┐
