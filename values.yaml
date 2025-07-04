@@ -1,77 +1,3 @@
-## This chart relies on the common library chart from bjw-s
-## You can find it and the values you can provide and modify, at https://github.com/bjw-s/helm-charts/tree/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common
-## Here's the link to the values.yaml file: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml
-## Refer there for more detail about the supported values.
-## Any values that you find in the above `values.yaml` can be provided to this chart and are then rendered.
-
-######################
-# VIKUNJA COMPONENTS #
-######################
-# You can find the default values that this `values.yaml` overrides, in the comment at the top of this file.
-vikunja:
-  image:
-    repository: vikunja/vikunja
-    #tag: "latest"
-    #pullPolicy: Always
-  persistence:
-    # This is where your Vikunja data lives,
-    # provide an existing PVC or let one be autocreated
-    data:
-      enabled: true
-      # existingClaim: # your-claim
-      accessMode: ReadWriteOnce
-      size: 2Gi
-      mountPath: /app/vikunja/files
-      # storageClass: storage-class
-  ingress:
-    main:
-      enabled: true
-      annotations:
-        # proxy-body-size is set to 0 to remove the body limit on file uploads
-        nginx.ingress.kubernetes.io/proxy-body-size: "0"
-      hosts:
-        - host: vikunja.local
-          paths:
-            - path: /
-      tls: []
-  configMaps:
-    # The configuration for Vikunja's api
-    # https://vikunja.io/docs/config-options/
-    api-config:
-      enabled: true
-      data:
-        config.yml: |
-          typesense:
-            # These configuration values will automatically apply
-            # if the integrated Typesense is enabled below (typesense.enabled)
-            url: "http://{{ printf "%s-typesense" .Release.Name }}:8108"
-            apiKey: "{{ .Values.typesense.env.TYPESENSE_API_KEY }}"
-          redis:
-            # These configuration values will automatically apply
-            # if the integrated Redis is enabled below (redis.enabled)
-            host: "http://{{ printf "%s-redis-master" .Release.Name }}:6379"
-            db: "{{ .Release.Name }}"
-  env:
-    # To utilize a secret in the environment variables, you can do something like the following: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L141-L145
-    # You could also use MySQL or SQLite, but we recommend PostgreSQL.
-    # https://vikunja.io/docs/config-options/#type
-    VIKUNJA_DATABASE_TYPE: "postgres"
-    VIKUNJA_DATABASE_HOST: "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local:{{ coalesce .Values.postgresql.global.postgresql.service.ports.postgresql .Values.postgresql.service.ports.postgresql }}"
-    VIKUNJA_DATABASE_USER: "{{ coalesce .Values.postgresql.global.postgresql.auth.username .Values.postgresql.auth.username }}"
-    VIKUNJA_DATABASE_PASSWORD: "{{ coalesce .Values.postgresql.global.postgresql.auth.password .Values.postgresql.auth.password }}"
-    VIKUNJA_DATABASE_NAME: "{{ coalesce .Values.postgresql.global.postgresql.auth.database .Values.postgresql.auth.database }}"
-
-##########################
-# END VIKUNJA COMPONENTS #
-##########################
-
-# Optional Dependencies
-
-#  ┬─┐┌─┐┐─┐┌┐┐┌─┐┬─┐┬─┐┐─┐┐─┐┬
-#  │─┘│ │└─┐ │ │ ┬│┬┘├─ └─┐│ ││
-#  ┘  ┘─┘──┘ ┘ ┘─┘┘└┘┴─┘──┘└─\┘─┘
-# Please refer to PostgreSQL subchart for a full list of possible values
-# https://github.com/bitnami/charts/tree/main/bitnami/postgresql/#parameters
 postgresql:
   enabled: true
   primary:
@@ -85,13 +11,8 @@ postgresql:
     ports:
       postgresql: 5432
 
-#  ┬─┐┬─┐┬─┐o┐─┐
-#  │┬┘├─ │ ││└─┐
-#  ┘└┘┴─┘┘─┘┘──┘
-# Please refer to Redis subchart for a full list of possible values
-# https://github.com/bitnami/charts/tree/main/bitnami/redis/#parameters
 redis:
-  enabled: false
+  enabled: true
   architecture: standalone
   auth:
     enabled: false
@@ -114,4 +35,4 @@ typesense:
     tag: 0.25.1
     pullPolicy: IfNotPresent
 
-additionalObjects: []
+additionalObjects: {}
