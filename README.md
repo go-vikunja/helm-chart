@@ -4,9 +4,9 @@
 [![CI](https://github.com/go-vikunja/helm-chart/actions/workflows/ci.yml/badge.svg)](https://github.com/go-vikunja/helm-chart/actions/workflows/ci.yml)
 
 This Helm Chart deploys the [Vikunja](https://hub.docker.com/r/vikunja/vikunja) container
-in addition to other Kubernetes resources for a full-featured Vikunja deployment.
-This includes Bitnami's [PostgreSQL](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) 
-and [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis) as subcharts if you want,
+with dependent Kubernetes resources for a full-featured Vikunja deployment.
+This optionally includes subcharts for Bitnami's [PostgreSQL](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) 
+and [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis),
 so Vikunja can use them as database and cache respectively.
 
 See https://artifacthub.io/packages/helm/vikunja/vikunja 
@@ -16,15 +16,14 @@ for version information and installation instructions.
 
 Both Vikunja containers got merged into one with Vikunja version 0.23.
 A separate `frontend` configuration is now obsolete,
-so deleting that and renaming the key `api` to `vikunja`
-should "just work".
-The only other major change is that the `configMaps.config` key was renamed to `api-config` 
-to highlight again that it only applies to the API.
+so deleting that and renaming the key `api` to `vikunja` should "just work".
+The only other major change is that the `configMaps.config` key was renamed to `api-config` to highlight that it only applies to the API.
 The Configmap name in the cluster stays the same.
 
 ## Quickstart
 
-The Helm chart is published to [GitHub Container Registry](https://github.com/go-vikunja/helm-chart/pkgs/container/helm-chart%2Fvikunja). To install it:
+The Helm chart is published to the [GitHub Container Registry](https://github.com/go-vikunja/helm-chart/pkgs/container/helm-chart%2Fvikunja).
+To install it:
 
 
 ```bash
@@ -42,10 +41,6 @@ helm install \
   -f values.yaml
 ```
 
-Define ingress settings according to your controller to access the application.
-You can configure Vikunja API options as yaml under `vikunja.configMaps.api-config.data.config.yml`:
-https://vikunja.io/docs/config-options
-
 For minimal configuration, your `values.yaml` should at least set up ingress:
 
 ```yaml
@@ -59,8 +54,12 @@ vikunja:
             - path: /
 ```
 
-For example, you can disable registration (if you do not with to allow others to register on your Vikunja),
-by providing the following values in your `values.yaml`:
+Define ingress settings according to your controller to access the application.
+
+You can setup Vikunja API options as yaml under `vikunja.configMaps.api-config.data.config.yml`:
+https://vikunja.io/docs/config-options
+
+You can disable registration if you do not wish to allow others to register on your Vikunja instance by setting the following values in your `values.yaml`:
 
 ```yaml
 vikunja:
@@ -97,10 +96,11 @@ and the connection [in Vikunja](https://vikunja.io/docs/config-options/#redis)
 
 ### Use an existing file volume claim
 
-In the `values.yaml` file, you can either define your own existing Persistent Volume Claim (PVC) 
+In the `values.yaml` file, 
+you can either define your own existing Persistent Volume Claim (PVC) 
 or have the chart create one on your behalf.
 
-To have the chart use your pre-existing PVC:
+To use your pre-existing PVC:
 
 ```yaml
 vikunja:
@@ -128,11 +128,12 @@ vikunja:
 ### Utilizing environment variables from Kubernetes secrets
 
 Each environment variable that is "injected" into a pod can be sourced from a Kubernetes secret.
-This is useful when you wish to add values that you would rather keep as secrets in your GitOps repo
-as environment variables in the pods.
+This is useful when you wish to add values 
+that you would rather keep as secrets in your GitOps repo as environment variables in the pods.
 
 Assuming that you had a Kubernetes secret named `vikunja-env`, 
-this is how you would add the value stored at key `VIKUNJA_DATABASE_PASSWORD` as the environment variable named `VIKUNJA_DATABASE_PASSWORD`:
+this is how you would add the value stored at key `VIKUNJA_DATABASE_PASSWORD` 
+as the environment variable named `VIKUNJA_DATABASE_PASSWORD`:
 
 ```yaml
 vikunja:
