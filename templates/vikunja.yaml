@@ -1,8 +1,96 @@
-{{- define "vikunja.vikunja.hardcodedValues" -}}
+---
+{{- include "bjw-s.common.loader.init" . }}
+
+{{- define "vikunja.hardcodedValues" -}}
+defaultOptions:
+  securityContext:
+    fsGroup: 1000
+  enableServiceLinks: false
+
+controllers:
+  main:
+    containers:
+      main:
+        image:
+          repository: vikunja/vikunja
+          tag: latest
+        probes:
+          liveness: &probes
+            enabled: true
+            custom: true
+            spec:
+              httpGet:
+                path: /api/v1/info
+                port: 3456
+                scheme: HTTP
+              initialDelaySeconds: 0
+              periodSeconds: 10
+              timeoutSeconds: 1
+              failureThreshold: 3
+          readiness: *probes
+          startup:
+            enabled: false
+        env:
+          VIKUNJA_DATABASE_TYPE: postgres
+          VIKUNJA_DATABASE_HOST: "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local:{{ coalesce .Values.postgresql.global.postgresql.service.ports.postgresql .Values.postgresql.service.ports.postgresql }}"
+          VIKUNJA_DATABASE_USER: "{{ coalesce .Values.postgresql.global.postgresql.auth.username .Values.postgresql.auth.username }}"
+          VIKUNJA_DATABASE_PASSWORD: "{{ coalesce .Values.postgresql.global.postgresql.auth.password .Values.postgresql.auth.password }}"
+          VIKUNJA_DATABASE_NAME: "{{ coalesce .Values.postgresql.global.postgresql.auth.database .Values.postgresql.auth.database }}"
+          {{- if .Values.redis.enabled }}
+          VIKUNJA_REDIS_ENABLED: true
+          {{- end }}
+          {{- if .Values.redis.enabled }}
+          VIKUNJA_TYPESENSE_ENABLED: true
+          {{- end }}
+
+persistence:
+  # This is where your Vikunja data lives,
+  # provide an existing PVC or let one be autocreated
+  data:
+    enabled: true
+    # existingClaim: # your-claim
+    accessMode: ReadWriteOnce
+    size: 2Gi
+    advancedMounts:
+      # controller
+      main:
+        # container
+        main:
+          - path: /app/vikunja/files
+            subPath: config.yaml
+    # storageClass: storage-class
+  api-config:
+    enabled: true
+    type: configMap
+    name: {{ .Release.Name }}
+    advancedMounts:
+      # controller
+      main:
+        # container
+        main:
+          - path: /etc/vikunja/config.yaml
+            subPath: config.yaml
+
+configMaps:
+  api-config:
+    enabled: true
+    data:
+      config.yml: |
+        {{- if .Values.typesense.enabled }}
+        typesense:
+          url: "http://{{ printf "%s-typesense" .Release.Name }}:8108"
+          apiKey: "{{ .Values.typesense.env.TYPESENSE_API_KEY }}"
+        {{- end }}
+        {{- if .Values.redis.enabled }}
+        redis:
+          host: "http://{{ printf "%s-redis-master" .Release.Name }}:6379"
+          db: "{{ .Release.Name }}"
+        {{- end }}
+
 service:
   main:
-    controller: main
     enabled: true
+    controller: main
     primary: true
     type: ClusterIP
     ports:
@@ -12,46 +100,16 @@ service:
         port: 3456
         protocol: HTTP
 
-enableServiceLinks: false
-
-podSecurityContext:
-  fsGroup: 1000
-
-persistence:
-  config:
+ingress:
+  main:
     enabled: true
-    type: configMap
-    name: "{{ .Release.Name }}-api-config"
-    mountPath: /etc/vikunja/config.yml
-    subPath: config.yml
+    hosts:
+      - host: vikunja.local
+        paths:
+        - path: /
 
-probes:
-  liveness: &probes
-    enabled: true
-    custom: true
-    spec:
-      httpGet:
-        path: /api/v1/info
-        port: http
-      initialDelaySeconds: 0
-      periodSeconds: 10
-      timeoutSeconds: 1
-      failureThreshold: 3
-  readiness: *probes
-  startup:
-    enabled: false
+{{- end -}}
+{{- $_ := mergeOverwrite .Values (include "vikunja.hardcodedValues" . | fromYaml) -}}
 
-
-env:
-{{ if .Values.redis.enabled }}
-  VIKUNJA_REDIS_ENABLED: "true"
-{{ end }}
-{{ if .Values.typesense.enabled }}
-  VIKUNJA_TYPESENSE_ENABLED: "true"
-{{ end }}
-{{ end }}
-
-{{- $ctx := deepCopy . -}}
-{{- $_ := get .Values "vikunja" | mergeOverwrite $ctx.Values -}}
-{{- $_ = include "vikunja.vikunja.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
-{{- include "bjw-s.common.loader.all" $ctx }}
+{{/* Render the templates */}}
+{{ include "bjw-s.common.loader.generate" . }}

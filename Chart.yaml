@@ -8,7 +8,7 @@ description: |-
   The open-source, self-hostable to-do app. Organize everything, on all platforms.
 annotations:
   category: TaskTracker
-version: 1.1.0
+version: 2.0.0-beta.1
 appVersion: 0.24.6
 kubeVersion: ">= 1.19"
 dependencies:
@@ -24,7 +24,7 @@ dependencies:
   condition: postgresql.enabled
 - name: common
   repository: https://bjw-s-labs.github.io/helm-charts
-  version: 1.5.1
+  version: 4.1.2
 keywords:
 - vikunja
 - todo
