@@ -43,9 +43,6 @@ probes:
 
 
 env:
-{{ if .Values.redis.enabled }}
-  VIKUNJA_REDIS_ENABLED: "true"
-{{ end }}
 {{ if .Values.typesense.enabled }}
   VIKUNJA_TYPESENSE_ENABLED: "true"
 {{ end }}

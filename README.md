@@ -3,10 +3,9 @@
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/vikunja)](https://artifacthub.io/packages/search?repo=vikunja)
 [![CI](https://github.com/go-vikunja/helm-chart/actions/workflows/ci.yml/badge.svg)](https://github.com/go-vikunja/helm-chart/actions/workflows/ci.yml)
 
-This Helm Chart deploys the [Vikunja](https://hub.docker.com/r/vikunja/vikunja) container
+This Helm Chart deploys the [Vikunja](https://hub.docker.com/r/vikunja/vikunja) container based on bjw-s'
+[common library](https://github.com/bjw-s/helm-charts/tree/main/charts/library/common).
 with dependent Kubernetes resources for a full-featured Vikunja deployment.
-This optionally includes subcharts for Bitnami's [PostgreSQL](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) 
-and [Redis](https://github.com/bitnami/charts/tree/main/bitnami/redis),
 so Vikunja can use them as database and cache respectively.
 
 See https://artifacthub.io/packages/helm/vikunja/vikunja 
@@ -90,9 +89,8 @@ helm upgrade vikunja vikunja/vikunja -f values.yaml
 
 To effectively run multiple replicas of the API, 
 make sure to set up the redis cache as well
-by setting `vikunja.configMaps.api-config.data.config.yml.keyvalue.type` to `redis`,
-configuring the redis subchart (see [values.yaml](./values.yaml#L119))
-and the connection [in Vikunja](https://vikunja.io/docs/config-options/#redis)
+by setting up Valkey or Redis, and then 
+[configuring the proper Vikunja environment variables to point to it](https://vikunja.io/docs/config-options/#redis)
 
 ### Use an existing file volume claim
 

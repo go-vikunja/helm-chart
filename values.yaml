@@ -46,11 +46,6 @@ vikunja:
             # if the integrated Typesense is enabled below (typesense.enabled)
             url: "http://{{ printf "%s-typesense" .Release.Name }}:8108"
             apiKey: "{{ .Values.typesense.env.TYPESENSE_API_KEY }}"
-          redis:
-            # These configuration values will automatically apply
-            # if the integrated Redis is enabled below (redis.enabled)
-            host: "{{ printf "%s-redis-master" .Release.Name }}:6379"
-            db: "{{ .Release.Name }}"
   env:
     # To utilize a secret in the environment variables, you can do something like the following: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L141-L145
     # You could also use MySQL or SQLite, but we recommend PostgreSQL.
@@ -60,17 +55,6 @@ vikunja:
     VIKUNJA_DATABASE_USER: "vikunja"
     VIKUNJA_DATABASE_PASSWORD: "changeme"
     VIKUNJA_DATABASE_DATABASE: "vikunja"
-
-#  ┬─┐┬─┐┬─┐o┐─┐
-#  │┬┘├─ │ ││└─┐
-#  ┘└┘┴─┘┘─┘┘──┘
-# Please refer to Redis subchart for a full list of possible values
-# https://github.com/bitnami/charts/tree/main/bitnami/redis/#parameters
-redis:
-  enabled: false
-  architecture: standalone
-  auth:
-    enabled: false
 
 typesense:
   enabled: true
