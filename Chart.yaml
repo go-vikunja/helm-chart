@@ -17,11 +17,6 @@ dependencies:
   # TODO Consider switch to valkey - staying with pre-fork redis 7.2.4 for now
   version: 18.6.3
   condition: redis.enabled
-- name: postgresql
-  repository: https://charts.bitnami.com/bitnami
-  # https://github.com/bitnami/charts/blob/main/bitnami/postgresql/Chart.yaml
-  version: 16.4.5 # Postgres 17.2
-  condition: postgresql.enabled
 - name: common
   repository: https://bjw-s-labs.github.io/helm-charts
   version: 1.5.1
