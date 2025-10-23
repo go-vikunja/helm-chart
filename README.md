@@ -5,11 +5,35 @@
 
 This Helm Chart deploys the [Vikunja](https://hub.docker.com/r/vikunja/vikunja) container based on bjw-s'
 [common library](https://github.com/bjw-s/helm-charts/tree/main/charts/library/common).
-with dependent Kubernetes resources for a full-featured Vikunja deployment.
-so Vikunja can use them as database and cache respectively.
 
 See https://artifacthub.io/packages/helm/vikunja/vikunja 
 for version information and installation instructions.
+
+## Requirements
+A database. Postgres is recommended, but any database (Sqllite, MySql, Postgres) supported by Vikunja should work.
+
+If you do not have a way to provide databases to your applications yet, Cloud Native Postgres (CNPG) is recommended.
+An example configuration, after you have installed [CNPG](https://cloudnative-pg.io/):
+```yaml
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-vikunja
+spec:
+  instances: 1
+  bootstrap:
+    initdb:
+      database: vikunja
+      secret:
+        name: vikunja-credentials
+      import:
+        type: microservice
+        databases:
+          - vikunja
+  storage:
+    size: 8Gi
+```
+
 
 ## Upgrading to v1
 
@@ -18,6 +42,44 @@ A separate `frontend` configuration is now obsolete,
 so deleting that and renaming the key `api` to `vikunja` should "just work".
 The only other major change is that the `configMaps.config` key was renamed to `api-config` to highlight that it only applies to the API.
 The Configmap name in the cluster stays the same.
+
+## Upgrading to v2
+The Bitnami charts (postgres and redis) are now deprecated.
+Please use the CNPG for Postgres and provide your own Redis instance (if you are using it, it was turned off by default 
+in v1)
+
+If you want to use Cloud Native PostGres (CNPG) this config should work for migration. Make sure your secret contains
+keys `username` and `password` matching your current database for the `initdb` section to use.
+```yaml
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cluster-vikunja
+spec:
+  instances: 1
+  bootstrap:
+    initdb:
+      database: vikunja
+      secret:
+        name: vikunja-credentials
+      import:
+        type: microservice
+        databases:
+          - vikunja
+        source:
+          externalCluster: cluster-vikunja-legacy
+  storage:
+    size: 8Gi
+  externalClusters:
+    - name: cluster-vikunja-legacy
+      connectionParameters:
+        host: vikunja-vikunja-postgresql.vikunja.svc.cluster.local
+        user: vikunja
+        dbname: vikunja
+      password:
+        name: vikunja-credentials
+        key: password
+```
 
 ## Quickstart
 
