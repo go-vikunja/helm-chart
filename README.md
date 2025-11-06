@@ -45,7 +45,7 @@ The Configmap name in the cluster stays the same.
 
 ## Upgrading to v2
 The Bitnami charts (postgres and redis) are now deprecated.
-Please use the CNPG for Postgres and provide your own Redis instance (if you are using it, it was turned off by default 
+Please use the CNPG for Postgres or another postgres database and provide your own Redis instance if you are using it (it was turned off by default 
 in v1)
 
 If you want to use Cloud Native PostGres (CNPG) this config should work for migration. Make sure your secret contains
