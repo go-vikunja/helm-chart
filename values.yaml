@@ -23,6 +23,14 @@ vikunja:
       size: 2Gi
       mountPath: /app/vikunja/files
       # storageClass: storage-class
+    # Persistence for SQLite database
+    database:
+      enabled: true
+      # existingClaim: # your-claim
+      accessMode: ReadWriteOnce
+      size: 2Gi
+      mountPath: /db
+      # storageClass: storage-class
   ingress:
     main:
       enabled: true
@@ -48,13 +56,10 @@ vikunja:
             apiKey: "{{ .Values.typesense.env.TYPESENSE_API_KEY }}"
   env:
     # To utilize a secret in the environment variables, you can do something like the following: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L141-L145
-    # You could also use MySQL or SQLite, but we recommend PostgreSQL.
-    # https://vikunja.io/docs/config-options/#type
-    VIKUNJA_DATABASE_TYPE: "postgres"
-    VIKUNJA_DATABASE_HOST: your-database-svc.namespace.svc.cluster.local
-    VIKUNJA_DATABASE_USER: "vikunja"
-    VIKUNJA_DATABASE_PASSWORD: "changeme"
-    VIKUNJA_DATABASE_DATABASE: "vikunja"
+    # You can use PostgreSQL, MySQL, or SQLite. SQLite is the default for simplicity.
+    # https://vikunja.io/docs/config-options
+    VIKUNJA_DATABASE_TYPE: "sqlite"
+    VIKUNJA_DATABASE_PATH: "/db/vikunja.db"
 
 typesense:
   enabled: true
