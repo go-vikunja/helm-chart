@@ -59,7 +59,6 @@ vikunja:
     # You can use PostgreSQL, MySQL, or SQLite. SQLite is the default for simplicity.
     # https://vikunja.io/docs/config-options
     VIKUNJA_DATABASE_TYPE: "sqlite"
-    VIKUNJA_DATABASE_PATH: "/db/vikunja.db"
 
 typesense:
   enabled: true
