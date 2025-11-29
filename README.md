@@ -9,9 +9,10 @@ This Helm Chart deploys the [Vikunja](https://hub.docker.com/r/vikunja/vikunja) 
 See https://artifacthub.io/packages/helm/vikunja/vikunja 
 for version information and installation instructions.
 
-## Requirements
-A database. Postgres is recommended, but any database (Sqllite, MySql, Postgres) supported by Vikunja should work.
+## Optional
+A different database. The Vikunja helm chart configures Vikunja with Sqlite by default, but MySql and Postgres are also supported by Vikunja and should work better if there are high performance requirements for this instance.
 
+Postgres is recommended for Vikunja instances with higher performance requirements.
 If you do not have a way to provide databases to your applications yet, Cloud Native Postgres (CNPG) is recommended.
 An example configuration, after you have installed [CNPG](https://cloudnative-pg.io/):
 ```yaml
@@ -44,6 +45,15 @@ The only other major change is that the `configMaps.config` key was renamed to `
 The Configmap name in the cluster stays the same.
 
 ## Upgrading to v2
+### Backup and Restore (Easiest)
+If only a few people are using your Vikunja instance,
+export your Vikunja data (and have them do the same) via the "export from Vikunja" feature in settings.
+
+Then if you're ok with Sqlite, just uninstall the old chart and reinstall the new v2 version.
+
+You can then log in and restore your data by importing the Vikunja export.
+
+### Find a new Postgres Provider
 The Bitnami charts (postgres and redis) are now deprecated.
 Please use the CNPG for Postgres or another postgres database and provide your own Redis instance if you are using it (it was turned off by default 
 in v1)
