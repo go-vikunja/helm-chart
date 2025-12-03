@@ -21,7 +21,7 @@ persistence:
   config:
     enabled: true
     type: configMap
-    name: "{{ .Release.Name }}-vikunja-api-config"
+    name: "{{ .Release.Name }}-vikunja-config"
     mountPath: /etc/vikunja/config.yml
     subPath: config.yml
 

@@ -9,7 +9,7 @@ This Helm Chart deploys the [Vikunja](https://hub.docker.com/r/vikunja/vikunja) 
 See https://artifacthub.io/packages/helm/vikunja/vikunja 
 for version information and installation instructions.
 
-## Optional
+## Optional Component
 A different database. The Vikunja helm chart configures Vikunja with Sqlite by default, but MySql and Postgres are also supported by Vikunja and should work better if there are high performance requirements for this instance.
 
 Postgres is recommended for Vikunja instances with higher performance requirements.
@@ -35,14 +35,6 @@ spec:
     size: 8Gi
 ```
 
-
-## Upgrading to v1
-
-Both Vikunja containers got merged into one with Vikunja version 0.23.
-A separate `frontend` configuration is now obsolete,
-so deleting that and renaming the key `api` to `vikunja` should "just work".
-The only other major change is that the `configMaps.config` key was renamed to `api-config` to highlight that it only applies to the API.
-The Configmap name in the cluster stays the same.
 
 ## Upgrading to v2
 ### Backup and Restore (Easiest)
@@ -127,7 +119,7 @@ vikunja:
 
 Define ingress settings according to your controller to access the application.
 
-You can setup Vikunja API options as yaml under `vikunja.configMaps.api-config.data.config.yml`:
+You can setup Vikunja API options as yaml under `vikunja.configMaps.config.data.config.yml`:
 https://vikunja.io/docs/config-options
 
 You can disable registration if you do not wish to allow others to register on your Vikunja instance by setting the following values in your `values.yaml`:
@@ -135,7 +127,7 @@ You can disable registration if you do not wish to allow others to register on y
 ```yaml
 vikunja:
   configMaps:
-    api-config:
+    config:
       enabled: true
       data:
         config.yml:
