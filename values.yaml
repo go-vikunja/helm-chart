@@ -4,9 +4,6 @@
 ## Refer there for more detail about the supported values.
 ## Any values that you find in the above `values.yaml` can be provided to this chart and are then rendered.
 
-######################
-# VIKUNJA COMPONENTS #
-######################
 # You can find the default values that this `values.yaml` overrides, in the comment at the top of this file.
 vikunja:
   image:
@@ -42,40 +39,10 @@ vikunja:
           paths:
             - path: /
       tls: []
-  configMaps:
-    # The configuration for Vikunja's api
-    # https://vikunja.io/docs/config-options/
-    config:
-      enabled: true
-      data:
-        config.yml: |
-          typesense:
-            # These configuration values will automatically apply
-            # if the integrated Typesense is enabled below (typesense.enabled)
-            url: "http://{{ printf "%s-typesense" .Release.Name }}:8108"
-            apiKey: "{{ .Values.typesense.env.TYPESENSE_API_KEY }}"
   env:
     # To utilize a secret in the environment variables, you can do something like the following: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L141-L145
     # You can use PostgreSQL, MySQL, or SQLite. SQLite is the default for simplicity.
     # https://vikunja.io/docs/config-options
     VIKUNJA_DATABASE_TYPE: "sqlite"
-
-typesense:
-  enabled: true
-  env:
-    TYPESENSE_DATA_DIR: /data
-    TYPESENSE_API_KEY: typesense
-  persistence:
-    data:
-      # Enabling typesense persistence is recommended to avoid slow reindexing
-      enabled: true
-      accessMode: ReadWriteOnce
-      size: 1Gi
-      # storageClass: storage-class
-
-  image:
-    repository: docker.io/typesense/typesense
-    tag: 0.25.1
-    pullPolicy: IfNotPresent
 
 additionalObjects: []

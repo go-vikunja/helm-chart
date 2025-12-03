@@ -43,9 +43,6 @@ probes:
 
 
 env:
-{{ if .Values.typesense.enabled }}
-  VIKUNJA_TYPESENSE_ENABLED: "true"
-{{ end }}
 {{ if eq .Values.vikunja.env.VIKUNJA_DATABASE_TYPE "sqlite" }}
   VIKUNJA_DATABASE_PATH: "/db/vikunja.db"
 {{ end }}
