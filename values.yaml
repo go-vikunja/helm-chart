@@ -39,6 +39,14 @@ vikunja:
           paths:
             - path: /
       tls: []
+  configMaps:
+    # The configuration for Vikunja's api
+    # https://vikunja.io/docs/config-options/
+    config:
+      enabled: true
+      data:
+        config.yml: |
+          # You can add Vikunja configuration items from https://vikunja.io/docs/config-options/ to this file
   env:
     # To utilize a secret in the environment variables, you can do something like the following: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L141-L145
     # You can use PostgreSQL, MySQL, or SQLite. SQLite is the default for simplicity.
