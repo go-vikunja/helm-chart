@@ -45,6 +45,68 @@ Then if you're ok with Sqlite, just uninstall the old chart and reinstall the ne
 
 You can then log in and restore your data by importing the Vikunja export.
 
+### Backup and Restore Many Users
+For more heavily used installations, you can make a Vikunja dump file and then use that to restore your installation.
+#### Make a dump file
+In order to use this, you must be on app version 1.0.0 or later. Earlier versions of Vikunja don't allow changing the path to save the dump to, and the Vikunja container security restrictions prevent writing to the default location for a dump in /. Instead, change the path to write to a pvc, like /db
+```bash
+kubectl exec sandboxvik-vikunja-5b89bc74dc-pd2rw -- /app/vikunja/vikunja dump -p /db
+```
+#### Exfiltrate the dump
+Create a sidecar that contains the necessary binaries for `kubectl cp`
+```bash
+kubectl run busybox-sidecar --image=busybox --overrides='
+{
+  "spec": {
+    "containers": [
+      {
+        "name": "busybox",
+        "image": "busybox",
+        "command": ["sleep", "infinity"],
+        "volumeMounts": [
+          {
+            "name": "pvc-volume",
+            "mountPath": "/data"
+          }
+        ]
+      }
+    ],
+    "volumes": [
+      {
+        "name": "pvc-volume",
+        "persistentVolumeClaim": {
+          "claimName": "sandboxvik-vikunja-database"
+        }
+      }
+    ]
+  }
+}
+'
+```
+Copy it to your  local system
+```bash
+kubectl cp busybox-sidecar:/data/vikunja-dump_DATE.zip ./vikunjadump.zip
+```
+#### Install the new chart
+Install a clean, fresh Vikunja installation.
+#### Provide the dump to the fresh installation
+Copy the Vikunja dump into a PVC the fresh Vikunja installation has access to, using the same sidecar pattern used to extract and exfiltrate the dump from the old container.
+
+Create the sidecar
+
+Copy the file in
+```bash
+kubectl cp ./vikunjadump.zip busybox-sidecar:/data/vikunja-dump.zip
+```
+
+Now delete the sidecar.
+#### Restore from the dump
+Use the [Vikunja restore cli command](https://vikunja.io/docs/cli/#restore).
+```bash
+kubectl exec sandboxvik-vikunja-5b89bc74dc-pd2rw -- /app/vikunja/vikunja restore /db/vikunja-dump.zip # or wherever you put the dump
+```
+Done!
+
 ### Find a new Postgres Provider
 The Bitnami charts (postgres and redis) are now deprecated.
 Please use the CNPG for Postgres or another postgres database and provide your own Redis instance if you are using it (it was turned off by default 
