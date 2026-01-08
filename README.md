@@ -101,9 +101,10 @@ kubectl cp ./vikunjadump.zip busybox-sidecar:/data/vikunja-dump.zip
 
 Now delete the sidecar.
 #### Restore from the dump
+Note that you must be on a post 1.0.0 version of vikunja to use the --preserve-config flag, which is necessary for the Vikunja container.
 Use the [Vikunja restore cli command](https://vikunja.io/docs/cli/#restore).
 ```bash
-kubectl exec sandboxvik-vikunja-5b89bc74dc-pd2rw -- /app/vikunja/vikunja restore /db/vikunja-dump.zip # or wherever you put the dump
+kubectl exec sandboxvik-vikunja-5b89bc74dc-pd2rw -- /app/vikunja/vikunja restore --preserve-config /db/vikunja-dump.zip # or wherever you put the dump
 ```
 Done!
 
