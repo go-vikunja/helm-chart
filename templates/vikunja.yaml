@@ -21,7 +21,7 @@ persistence:
   config:
     enabled: true
     type: configMap
-    name: "{{ .Release.Name }}-api-config"
+    name: "{{ .Release.Name }}-vikunja-config"
     mountPath: /etc/vikunja/config.yml
     subPath: config.yml
 
@@ -43,11 +43,8 @@ probes:
 
 
 env:
-{{ if .Values.redis.enabled }}
-  VIKUNJA_REDIS_ENABLED: "true"
-{{ end }}
-{{ if .Values.typesense.enabled }}
-  VIKUNJA_TYPESENSE_ENABLED: "true"
+{{ if eq .Values.vikunja.env.VIKUNJA_DATABASE_TYPE "sqlite" }}
+  VIKUNJA_DATABASE_PATH: "/db/vikunja.db"
 {{ end }}
 {{ end }}
 

@@ -4,9 +4,6 @@
 ## Refer there for more detail about the supported values.
 ## Any values that you find in the above `values.yaml` can be provided to this chart and are then rendered.
 
-######################
-# VIKUNJA COMPONENTS #
-######################
 # You can find the default values that this `values.yaml` overrides, in the comment at the top of this file.
 vikunja:
   image:
@@ -23,6 +20,14 @@ vikunja:
       size: 2Gi
       mountPath: /app/vikunja/files
       # storageClass: storage-class
+    # Persistence for SQLite database
+    database:
+      enabled: true
+      # existingClaim: # your-claim
+      accessMode: ReadWriteOnce
+      size: 2Gi
+      mountPath: /db
+      # storageClass: storage-class
   ingress:
     main:
       enabled: true
@@ -37,81 +42,18 @@ vikunja:
   configMaps:
     # The configuration for Vikunja's api
     # https://vikunja.io/docs/config-options/
-    api-config:
+    config:
       enabled: true
       data:
         config.yml: |
-          typesense:
-            # These configuration values will automatically apply
-            # if the integrated Typesense is enabled below (typesense.enabled)
-            url: "http://{{ printf "%s-typesense" .Release.Name }}:8108"
-            apiKey: "{{ .Values.typesense.env.TYPESENSE_API_KEY }}"
-          redis:
-            # These configuration values will automatically apply
-            # if the integrated Redis is enabled below (redis.enabled)
-            host: "{{ printf "%s-redis-master" .Release.Name }}:6379"
-            db: "{{ .Release.Name }}"
+          # You can add Vikunja configuration items from https://vikunja.io/docs/config-options/ to this file
+          service:
+            # Required after Vikunja 1.0.0
+            publicurl: # e.g. "https://example.com"
   env:
     # To utilize a secret in the environment variables, you can do something like the following: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L141-L145
-    # You could also use MySQL or SQLite, but we recommend PostgreSQL.
-    # https://vikunja.io/docs/config-options/#type
-    VIKUNJA_DATABASE_TYPE: "postgres"
-    VIKUNJA_DATABASE_HOST: "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local:{{ coalesce (dig \"postgresql\" \"service\" \"ports\" \"postgresql\" \"\" .Values.postgresql.global) .Values.postgresql.service.ports.postgresql }}"
-    VIKUNJA_DATABASE_USER: "{{ coalesce (dig \"postgresql\" \"auth\" \"username\" \"\" .Values.postgresql.global) .Values.postgresql.auth.username }}"
-    VIKUNJA_DATABASE_PASSWORD: "{{ coalesce (dig \"postgresql\" \"auth\" \"password\" \"\" .Values.postgresql.global) .Values.postgresql.auth.password }}"
-    VIKUNJA_DATABASE_DATABASE: "{{ coalesce (dig \"postgresql\" \"auth\" \"database\" \"\" .Values.postgresql.global) .Values.postgresql.auth.database }}"
-
-##########################
-# END VIKUNJA COMPONENTS #
-##########################
-
-# Optional Dependencies
-
-#  ┬─┐┌─┐┐─┐┌┐┐┌─┐┬─┐┬─┐┐─┐┐─┐┬
-#  │─┘│ │└─┐ │ │ ┬│┬┘├─ └─┐│ ││
-#  ┘  ┘─┘──┘ ┘ ┘─┘┘└┘┴─┘──┘└─\┘─┘
-# Please refer to PostgreSQL subchart for a full list of possible values
-# https://github.com/bitnami/charts/tree/main/bitnami/postgresql/#parameters
-postgresql:
-  enabled: true
-  primary:
-    networkPolicy:
-      enabled: false
-  auth:
-    username: vikunja
-    database: vikunja
-    password: vikunja
-  service:
-    ports:
-      postgresql: 5432
-
-#  ┬─┐┬─┐┬─┐o┐─┐
-#  │┬┘├─ │ ││└─┐
-#  ┘└┘┴─┘┘─┘┘──┘
-# Please refer to Redis subchart for a full list of possible values
-# https://github.com/bitnami/charts/tree/main/bitnami/redis/#parameters
-redis:
-  enabled: false
-  architecture: standalone
-  auth:
-    enabled: false
-
-typesense:
-  enabled: true
-  env:
-    TYPESENSE_DATA_DIR: /data
-    TYPESENSE_API_KEY: typesense
-  persistence:
-    data:
-      # Enabling typesense persistence is recommended to avoid slow reindexing
-      enabled: true
-      accessMode: ReadWriteOnce
-      size: 1Gi
-      # storageClass: storage-class
-
-  image:
-    repository: docker.io/typesense/typesense
-    tag: 0.25.1
-    pullPolicy: IfNotPresent
+    # You can use PostgreSQL, MySQL, or SQLite. SQLite is the default for simplicity.
+    # https://vikunja.io/docs/config-options
+    VIKUNJA_DATABASE_TYPE: "sqlite"
 
 additionalObjects: []
