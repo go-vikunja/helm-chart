@@ -35,3 +35,11 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login "ghcr.io" --username "${GITHUB_ACTOR}" --password-stdin
           helm push vikunja-*.tgz oci://${REGISTRY}
+
+      - name: Release
+        if: ${{ github.ref_type == 'tag' }}
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2
+        with:
+          draft: true
+          files: |
+            vikunja-*.tgz
