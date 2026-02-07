@@ -27,6 +27,15 @@ jobs:
           helm dependency update
           helm package .
 
+      - name: test-setup
+        # Docs and local install guide: https://kind.sigs.k8s.io/
+        uses: helm/kind-action@v1
+      - name: test
+        run: |
+          # 'kubectl wait' covers trivial availability checks. For non-trivial cases, use a more idiomatic 'helm test': https://helm.sh/docs/topics/chart_tests/
+          helm install vikunja . --values ./templates/tests/install/values.yaml
+          kubectl wait --for condition=available --timeout 30s deploy/vikunja
+
       - name: Push to Github Container Registry (OCI)
         if: ${{ github.ref_type == 'tag' }}
         shell: bash
