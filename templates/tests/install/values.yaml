@@ -1,0 +1,7 @@
+vikunja:
+  configMaps:
+    config:
+      data:
+        config.yml: |
+          service:
+            publicurl: "https://localhost"
