@@ -4,4 +4,4 @@ vikunja:
       data:
         config.yml: |
           service:
-            publicurl: "https://try.vikunja.io"
+            publicurl: "https://localhost"
