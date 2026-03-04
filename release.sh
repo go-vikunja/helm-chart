@@ -8,6 +8,8 @@ if [ $# -lt 1 ]; then
 fi
 
 VERSION="$1"
+# Strip 'v' prefix if present (helm convention: no v prefix)
+VERSION="${VERSION#v}"
 TAG_DESCRIPTION="${2:-}"
 DATE=$(date +%Y-%m-%d)
 

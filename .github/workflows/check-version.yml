@@ -1,0 +1,105 @@
+name: Check for new Vikunja releases
+
+on:
+  schedule:
+    # Run daily at 9 AM UTC
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  check-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch latest release from upstream
+        id: latest_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          RELEASE_INFO=$(gh api repos/go-vikunja/vikunja/releases --jq '.[0]')
+          LATEST_VERSION=$(echo "$RELEASE_INFO" | jq -r '.tag_name')
+
+          # Strip 'v' prefix if present
+          LATEST_VERSION="${LATEST_VERSION#v}"
+
+          echo "Latest upstream version: $LATEST_VERSION"
+          echo "version=$LATEST_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Get current version
+        id: current_version
+        run: |
+          CURRENT_VERSION=$(grep '^appVersion:' Chart.yaml | awk '{print $2}')
+
+          echo "Current version: $CURRENT_VERSION"
+          echo "version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Compare versions
+        id: compare
+        run: |
+          LATEST="${{ steps.latest_release.outputs.version }}"
+          CURRENT="${{ steps.current_version.outputs.version }}"
+
+          if [ "$LATEST" = "$CURRENT" ]; then
+            echo "Already up to date (version $CURRENT)"
+            echo "needs_update=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Update needed: $CURRENT -> $LATEST"
+            echo "needs_update=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bump chart version
+        if: steps.compare.outputs.needs_update == 'true'
+        id: chart_version
+        run: |
+          CURRENT_CHART_VERSION=$(grep '^version:' Chart.yaml | awk '{print $2}')
+          # Bump the minor version and reset patch to 0
+          MAJOR=$(echo "$CURRENT_CHART_VERSION" | cut -d. -f1)
+          MINOR=$(echo "$CURRENT_CHART_VERSION" | cut -d. -f2)
+          NEW_CHART_VERSION="${MAJOR}.$((MINOR + 1)).0"
+
+          echo "Chart version: $CURRENT_CHART_VERSION -> $NEW_CHART_VERSION"
+          echo "version=$NEW_CHART_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check if tag already exists
+        if: steps.compare.outputs.needs_update == 'true'
+        id: check_tag
+        run: |
+          VERSION="${{ steps.chart_version.outputs.version }}"
+
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "Tag $VERSION already exists, skipping"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update Chart.yaml
+        if: steps.compare.outputs.needs_update == 'true' && steps.check_tag.outputs.exists == 'false'
+        run: |
+          APP_VERSION="${{ steps.latest_release.outputs.version }}"
+          CHART_VERSION="${{ steps.chart_version.outputs.version }}"
+
+          sed -i "s/^version: .*/version: ${CHART_VERSION}/" Chart.yaml
+          sed -i "s/^appVersion: .*/appVersion: ${APP_VERSION}/" Chart.yaml
+
+      - name: Commit, tag and push
+        if: steps.compare.outputs.needs_update == 'true' && steps.check_tag.outputs.exists == 'false'
+        run: |
+          APP_VERSION="${{ steps.latest_release.outputs.version }}"
+          CHART_VERSION="${{ steps.chart_version.outputs.version }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add Chart.yaml
+          git commit -m "chore: update appVersion to ${APP_VERSION}"
+          git tag -a "${CHART_VERSION}" -m "${CHART_VERSION}"
+          git push origin main --tags
