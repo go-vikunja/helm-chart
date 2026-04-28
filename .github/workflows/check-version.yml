@@ -99,8 +99,21 @@ jobs:
           sed -i "s/^version: .*/version: ${CHART_VERSION}/" Chart.yaml
           sed -i "s/^appVersion: .*/appVersion: ${APP_VERSION}/" Chart.yaml
 
+      - name: Check if PR already exists
+        id: check_pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          EXISTING=$(gh pr list --head "chore/update-vikunja-${{ steps.latest_release.outputs.version }}" --json number --jq '.[0].number')
+          if [ -n "$EXISTING" ]; then
+            echo "PR #$EXISTING already exists, skipping"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Commit and push to branch
-        if: steps.compare.outputs.needs_update == 'true' && steps.check_tag.outputs.exists == 'false'
+        if: steps.compare.outputs.needs_update == 'true' && steps.check_tag.outputs.exists == 'false' && steps.check_pr.outputs.exists == 'false'
         id: push_branch
         run: |
           APP_VERSION="${{ steps.latest_release.outputs.version }}"
@@ -117,7 +130,7 @@ jobs:
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Create pull request
-        if: steps.compare.outputs.needs_update == 'true' && steps.check_tag.outputs.exists == 'false'
+        if: steps.compare.outputs.needs_update == 'true' && steps.check_tag.outputs.exists == 'false' && steps.check_pr.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
