@@ -10,12 +10,12 @@ annotations:
   category: TaskTracker
 version: 2.1.0
 appVersion: 2.1.0
-kubeVersion: ">= 1.19"
+kubeVersion: ">= 1.28"
 dependencies:
 - name: app-template
   alias: vikunja
   repository: https://bjw-s-labs.github.io/helm-charts
-  version: 1.5.1
+  version: 5.0.1
 keywords:
 - vikunja
 - todo

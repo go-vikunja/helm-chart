@@ -11,48 +11,86 @@ vikunja:
     labels:
       helm.sh/chart: "vikunja-2.1.0"
       app.kubernetes.io/version: "2.1.0"
-  image:
-    repository: vikunja/vikunja
-    tag: "2.1.0"
-    #pullPolicy: Always
+    createDefaultServiceAccount: false
+  defaultPodOptions:
+    automountServiceAccountToken: true
+    enableServiceLinks: false
+    securityContext:
+      fsGroup: 1000
+  controllers:
+    main:
+      strategy: Recreate
+      containers:
+        main:
+          nameOverride: "{{ include \"bjw-s.common.lib.chart.names.fullname\" . }}"
+          image:
+            repository: vikunja/vikunja
+            tag: "2.1.0"
+            #pullPolicy: Always
+          env:
+            # To utilize a secret in the environment variables, you can do something like the following: https://github.com/bjw-s/helm-charts/blob/main/charts/library/common/values.yaml
+            # You can use PostgreSQL, MySQL, or SQLite. SQLite is the default for simplicity.
+            # https://vikunja.io/docs/config-options
+            VIKUNJA_DATABASE_PATH: "/db/vikunja.db"
+            VIKUNJA_DATABASE_TYPE: "sqlite"
+          probes:
+            liveness:
+              enabled: true
+              custom: true
+              spec:
+                httpGet:
+                  path: /api/v1/info
+                  port: http
+                initialDelaySeconds: 0
+                periodSeconds: 10
+                timeoutSeconds: 1
+                failureThreshold: 3
+            readiness:
+              enabled: true
+              custom: true
+              spec:
+                httpGet:
+                  path: /api/v1/info
+                  port: http
+                initialDelaySeconds: 0
+                periodSeconds: 10
+                timeoutSeconds: 1
+                failureThreshold: 3
   service:
     main:
       controller: main
-      enabled: true
       primary: true
       type: ClusterIP
       ports:
         http:
-          enabled: true
           primary: true
           port: 3456
           protocol: HTTP
-  enableServiceLinks: false
-  podSecurityContext:
-    fsGroup: 1000
   persistence:
     config:
-      enabled: true
       type: configMap
       name: "{{ include \"bjw-s.common.lib.chart.names.fullname\" . }}-config"
-      mountPath: /etc/vikunja/config.yml
-      subPath: config.yml
+      globalMounts:
+        - path: /etc/vikunja/config.yml
+          subPath: config.yml
     # This is where your Vikunja data lives,
     # provide an existing PVC or let one be autocreated
     data:
-      enabled: true
       # existingClaim: # your-claim
+      type: persistentVolumeClaim
       accessMode: ReadWriteOnce
       size: 2Gi
-      mountPath: /app/vikunja/files
+      globalMounts:
+        - path: /app/vikunja/files
       # storageClass: storage-class
     # Persistence for SQLite database
     database:
-      enabled: true
       # existingClaim: # your-claim
+      type: persistentVolumeClaim
       accessMode: ReadWriteOnce
       size: 2Gi
-      mountPath: /db
+      globalMounts:
+        - path: /db
       # storageClass: storage-class
   ingress:
     main:
@@ -69,43 +107,13 @@ vikunja:
     # The configuration for Vikunja's api
     # https://vikunja.io/docs/config-options/
     config:
-      enabled: true
+      suffix: config
+      includeInChecksum: true
       data:
         config.yml: |
           # You can add Vikunja configuration items from https://vikunja.io/docs/config-options/ to this file
           service:
             # Required after Vikunja 1.0.0
             publicurl: # e.g. "https://example.com"
-  env:
-    # To utilize a secret in the environment variables, you can do something like the following: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L141-L145
-    # You can use PostgreSQL, MySQL, or SQLite. SQLite is the default for simplicity.
-    # https://vikunja.io/docs/config-options
-    VIKUNJA_DATABASE_PATH: "/db/vikunja.db"
-    VIKUNJA_DATABASE_TYPE: "sqlite"
-  probes:
-    liveness:
-      enabled: true
-      custom: true
-      spec:
-        httpGet:
-          path: /api/v1/info
-          port: http
-        initialDelaySeconds: 0
-        periodSeconds: 10
-        timeoutSeconds: 1
-        failureThreshold: 3
-    readiness:
-      enabled: true
-      custom: true
-      spec:
-        httpGet:
-          path: /api/v1/info
-          port: http
-        initialDelaySeconds: 0
-        periodSeconds: 10
-        timeoutSeconds: 1
-        failureThreshold: 3
-    startup:
-      enabled: false
 
 additionalObjects: []

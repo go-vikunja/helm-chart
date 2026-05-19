@@ -97,7 +97,7 @@ jobs:
 
           sed -i "s/^version: .*/version: ${CHART_VERSION}/" Chart.yaml
           sed -i "s/^appVersion: .*/appVersion: ${APP_VERSION}/" Chart.yaml
-          sed -i "/^  image:/,/^  [^ ]/ s/^    tag: .*/    tag: \"${APP_VERSION}\"/" values.yaml
+          sed -i "s/^            tag: .*/            tag: \"${APP_VERSION}\"/" values.yaml
           sed -i "/^  global:/,/^  [^ ]/ s/^      helm.sh\\/chart: .*/      helm.sh\\/chart: \"vikunja-${CHART_VERSION}\"/" values.yaml
           sed -i "/^  global:/,/^  [^ ]/ s/^      app.kubernetes.io\\/version: .*/      app.kubernetes.io\\/version: \"${APP_VERSION}\"/" values.yaml
 
