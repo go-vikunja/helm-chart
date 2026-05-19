@@ -4,7 +4,7 @@
 [![CI](https://github.com/go-vikunja/helm-chart/actions/workflows/ci.yml/badge.svg)](https://github.com/go-vikunja/helm-chart/actions/workflows/ci.yml)
 
 This Helm Chart deploys the [Vikunja](https://hub.docker.com/r/vikunja/vikunja) container based on bjw-s'
-[common library](https://github.com/bjw-s/helm-charts/tree/main/charts/library/common).
+[app-template chart](https://github.com/bjw-s/helm-charts/tree/main/charts/other/app-template).
 
 See https://artifacthub.io/packages/helm/vikunja/vikunja 
 for version information and installation instructions.
@@ -318,11 +318,12 @@ stringData:
 ### Modifying Deployed Resources
 
 Oftentimes, modifications need to be made to a Helm chart to allow it to operate in your Kubernetes cluster.
-Anything you see [in bjw-s' `common` library](https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml),
+Anything you see [in bjw-s' `app-template` chart](https://github.com/bjw-s/helm-charts/tree/main/charts/other/app-template),
+or the values it exposes from the [`common` library](https://github.com/bjw-s/helm-charts/blob/main/charts/library/common/values.yaml),
 including the top-level keys, can be added and subtracted from this chart's `values.yaml`, 
 underneath the `vikunja` key.
 
-For example, if you wished to create a `serviceAccount` as can be seen [here](https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L85-L87) for the `vikunja` pod:
+For example, if you wished to create a `serviceAccount` for the `vikunja` pod:
 
 ```yaml
 vikunja:
