@@ -33,6 +33,10 @@ vikunja:
             # https://vikunja.io/docs/config-options
             VIKUNJA_DATABASE_PATH: "/db/vikunja.db"
             VIKUNJA_DATABASE_TYPE: "sqlite"
+          ports:
+            - name: http
+              containerPort: 3456
+              protocol: TCP
           probes:
             liveness:
               enabled: true
