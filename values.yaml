@@ -4,6 +4,13 @@
 ## Refer there for more detail about the supported values.
 ## Any values that you find in the above `values.yaml` can be provided to this chart and are then rendered.
 
+app-template:
+  controller:
+    enabled: false
+  service:
+    main:
+      enabled: false
+
 # You can find the default values that this `values.yaml` overrides, in the comment at the top of this file.
 vikunja:
   image:

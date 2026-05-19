@@ -12,7 +12,7 @@ version: 2.1.0
 appVersion: 2.1.0
 kubeVersion: ">= 1.19"
 dependencies:
-- name: common
+- name: app-template
   repository: https://bjw-s-labs.github.io/helm-charts
   version: 1.5.1
 keywords:
@@ -29,4 +29,3 @@ maintainers:
 sources:
 - https://github.com/go-vikunja/helm-chart
 - https://vikunja.io
-

@@ -49,6 +49,9 @@ env:
 {{ end }}
 
 {{- $ctx := deepCopy . -}}
+{{- $appTemplate := get .Subcharts "app-template" -}}
+{{- $common := get $appTemplate.Subcharts "common" -}}
+{{- $_ := set $ctx.Values "common" (deepCopy $common.Values) -}}
 {{- $_ := get .Values "vikunja" | mergeOverwrite $ctx.Values -}}
 {{- $_ = include "vikunja.vikunja.hardcodedValues" . | fromYaml | merge $ctx.Values -}}
 {{- include "bjw-s.common.loader.all" $ctx }}
