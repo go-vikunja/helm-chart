@@ -1,32 +1,100 @@
-## This chart relies on the common library chart from bjw-s
-## You can find it and the values you can provide and modify, at https://github.com/bjw-s/helm-charts/tree/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common
-## Here's the link to the values.yaml file: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml
+## This chart relies on the app-template chart from bjw-s
+## You can find it and the values you can provide and modify, at https://github.com/bjw-s/helm-charts/tree/main/charts/other/app-template
+## Here's the link to the values.yaml file: https://github.com/bjw-s/helm-charts/blob/main/charts/library/common/values.yaml
 ## Refer there for more detail about the supported values.
 ## Any values that you find in the above `values.yaml` can be provided to this chart and are then rendered.
 
 # You can find the default values that this `values.yaml` overrides, in the comment at the top of this file.
 vikunja:
-  image:
-    repository: vikunja/vikunja
-    #tag: "latest"
-    #pullPolicy: Always
+  global:
+    nameOverride: vikunja
+    labels:
+      helm.sh/chart: "vikunja-2.1.0"
+      app.kubernetes.io/version: "2.1.0"
+    createDefaultServiceAccount: false
+  defaultPodOptions:
+    automountServiceAccountToken: true
+    enableServiceLinks: false
+    securityContext:
+      fsGroup: 1000
+  controllers:
+    main:
+      strategy: Recreate
+      containers:
+        main:
+          nameOverride: "{{ include \"bjw-s.common.lib.chart.names.fullname\" . }}"
+          image:
+            repository: vikunja/vikunja
+            tag: "2.1.0"
+            #pullPolicy: Always
+          env:
+            # To utilize a secret in the environment variables, you can do something like the following: https://github.com/bjw-s/helm-charts/blob/main/charts/library/common/values.yaml
+            # You can use PostgreSQL, MySQL, or SQLite. SQLite is the default for simplicity.
+            # https://vikunja.io/docs/config-options
+            VIKUNJA_DATABASE_PATH: "/db/vikunja.db"
+            VIKUNJA_DATABASE_TYPE: "sqlite"
+          ports:
+            - name: http
+              containerPort: 3456
+              protocol: TCP
+          probes:
+            liveness:
+              enabled: true
+              custom: true
+              spec:
+                httpGet:
+                  path: /api/v1/info
+                  port: http
+                initialDelaySeconds: 0
+                periodSeconds: 10
+                timeoutSeconds: 1
+                failureThreshold: 3
+            readiness:
+              enabled: true
+              custom: true
+              spec:
+                httpGet:
+                  path: /api/v1/info
+                  port: http
+                initialDelaySeconds: 0
+                periodSeconds: 10
+                timeoutSeconds: 1
+                failureThreshold: 3
+  service:
+    main:
+      controller: main
+      primary: true
+      type: ClusterIP
+      ports:
+        http:
+          primary: true
+          port: 3456
+          protocol: HTTP
   persistence:
+    config:
+      type: configMap
+      name: "{{ include \"bjw-s.common.lib.chart.names.fullname\" . }}-config"
+      globalMounts:
+        - path: /etc/vikunja/config.yml
+          subPath: config.yml
     # This is where your Vikunja data lives,
     # provide an existing PVC or let one be autocreated
     data:
-      enabled: true
       # existingClaim: # your-claim
+      type: persistentVolumeClaim
       accessMode: ReadWriteOnce
       size: 2Gi
-      mountPath: /app/vikunja/files
+      globalMounts:
+        - path: /app/vikunja/files
       # storageClass: storage-class
     # Persistence for SQLite database
     database:
-      enabled: true
       # existingClaim: # your-claim
+      type: persistentVolumeClaim
       accessMode: ReadWriteOnce
       size: 2Gi
-      mountPath: /db
+      globalMounts:
+        - path: /db
       # storageClass: storage-class
   ingress:
     main:
@@ -43,17 +111,13 @@ vikunja:
     # The configuration for Vikunja's api
     # https://vikunja.io/docs/config-options/
     config:
-      enabled: true
+      suffix: config
+      includeInChecksum: true
       data:
         config.yml: |
           # You can add Vikunja configuration items from https://vikunja.io/docs/config-options/ to this file
           service:
             # Required after Vikunja 1.0.0
             publicurl: # e.g. "https://example.com"
-  env:
-    # To utilize a secret in the environment variables, you can do something like the following: https://github.com/bjw-s/helm-charts/blob/a081de53024d8328d1ae9ff7e4f6bc500b0f3a29/charts/library/common/values.yaml#L141-L145
-    # You can use PostgreSQL, MySQL, or SQLite. SQLite is the default for simplicity.
-    # https://vikunja.io/docs/config-options
-    VIKUNJA_DATABASE_TYPE: "sqlite"
 
 additionalObjects: []

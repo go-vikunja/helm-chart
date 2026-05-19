@@ -14,8 +14,9 @@ TAG_DESCRIPTION="${2:-}"
 DATE=$(date +%Y-%m-%d)
 
 sed -i "s/^version: .*/version: ${VERSION}/" Chart.yaml
+sed -i "/^  global:/,/^  [^ ]/ s/^      helm.sh\\/chart: .*/      helm.sh\\/chart: \"vikunja-${VERSION}\"/" values.yaml
 
-git add Chart.yaml
+git add Chart.yaml values.yaml
 git commit -m "chore: release ${VERSION}"
 
 TAG_MESSAGE="${VERSION} [${DATE}]"
