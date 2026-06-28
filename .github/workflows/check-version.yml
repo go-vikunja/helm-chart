@@ -37,7 +37,12 @@ jobs:
       - name: Get current version
         id: current_version
         run: |
-          CURRENT_VERSION=$(grep '^appVersion:' Chart.yaml | awk '{print $2}')
+          CURRENT_VERSION="$(
+            grep '^appVersion:' Chart.yaml \
+              | awk '{print $2}' \
+              | tr -d "'\"" \
+              | sed -E 's/^v//'
+          )"
 
           echo "Current version: $CURRENT_VERSION"
           echo "version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
