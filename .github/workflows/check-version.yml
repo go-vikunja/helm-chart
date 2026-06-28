@@ -101,6 +101,7 @@ jobs:
 
       - name: Check if PR already exists
         id: check_pr
+        if: steps.compare.outputs.needs_update == 'true' && steps.check_tag.outputs.exists == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -109,7 +110,7 @@ jobs:
             echo "PR #$EXISTING already exists, skipping"
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else
-            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Commit and push to branch
