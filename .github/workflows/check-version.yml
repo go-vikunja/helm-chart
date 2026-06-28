@@ -25,13 +25,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          RELEASE_INFO=$(gh api repos/go-vikunja/vikunja/releases --jq '.[0]')
-          LATEST_VERSION=$(echo "$RELEASE_INFO" | jq -r '.tag_name')
-
-          # Strip 'v' prefix if present
-          LATEST_VERSION="${LATEST_VERSION#v}"
-
-          echo "Latest upstream version: $LATEST_VERSION"
+          LATEST_VERSION="$(
+            gh release view \
+              --repo go-vikunja/vikunja \
+              --json tagName \
+              --jq '.tagName' \
+            | sed -E 's/^v//'
+          )"
           echo "version=$LATEST_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Get current version
