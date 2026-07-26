@@ -193,7 +193,7 @@ vikunja:
     config:
       enabled: true
       data:
-        config.yml:
+        config.yml: |
           service:
             enableregistration: false
 ```
