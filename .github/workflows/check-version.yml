@@ -14,11 +14,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Bot app token so the push can bypass the main branch ruleset
+      - name: Generate bot token
+        id: bot_token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_APP_PRIVATE_KEY }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           fetch-tags: true
+          token: ${{ steps.bot_token.outputs.token }}
 
       - name: Fetch latest release from upstream
         id: latest_release
