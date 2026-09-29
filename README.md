@@ -201,7 +201,7 @@ vikunja:
 You can still create new users by executing the following command in the `vikunja` container:
 
 ```bash
-./vikunja user create --email <user@email.com> --user <user1> --password <password123>
+./vikunja user create --email <user@email.com> --username <user1> --password <password123>
 ```
 
 To upgrade an existing installation:
