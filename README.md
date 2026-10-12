@@ -278,7 +278,7 @@ you can simplify passing multiple values to this:
 vikunja:
   envFrom:
     - secretRef:
-      name: vikunja-secret-env
+        name: vikunja-secret-env
   env:
     VIKUNJA_DATABASE_USERNAME: "db-user"
 ```
